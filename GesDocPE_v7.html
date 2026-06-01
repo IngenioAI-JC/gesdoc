@@ -1,0 +1,2747 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GesDoc PE · Sistema de Gestión Documental</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  /* Paleta institucional: azul marino profundo + teal + ámbar */
+  --ink:#0B1426;
+  --ink2:#1A2740;
+  --ink3:#2E4066;
+  --surface:#F0F4FA;
+  --surface2:#E4EBF5;
+  --surface3:#D6E0F0;
+  --line:#C8D5E8;
+  --line2:#B0C2DB;
+  --white:#FFFFFF;
+  /* Primary: Azul Índigo institucional */
+  --primary:#1E3A8A;
+  --primary-d:#162C6E;
+  --primary-l:#EEF2FF;
+  --primary-m:#BFCFFE;
+  /* Teal accent dinámico */
+  --teal:#0D7490;
+  --teal-d:#0A5F78;
+  --teal-l:#E0F5F8;
+  --teal-m:#99DDE8;
+  /* Ámbar */
+  --amber:#92400E;
+  --amber-l:#FFFBEB;
+  --amber-m:#FDE68A;
+  /* Success / Warn / Danger */
+  --success:#065F46;
+  --success-l:#ECFDF5;
+  --success-m:#A7F3D0;
+  --warn:#78350F;
+  --warn-l:#FFFBEB;
+  --warn-m:#FCD34D;
+  --danger:#991B1B;
+  --danger-l:#FEF2F2;
+  --danger-m:#FECACA;
+  /* Residencia */
+  --res:#4C1D95;
+  --res-l:#F5F3FF;
+  --res-m:#C4B5FD;
+  /* Admin */
+  --adm:#065F46;
+  --adm-l:#ECFDF5;
+  --adm-m:#6EE7B7;
+
+  --mono:'JetBrains Mono',monospace;
+  --sans:'Plus Jakarta Sans',sans-serif;
+  --radius:10px;
+  --radius-lg:16px;
+  --shadow:0 1px 4px rgba(11,20,38,.08),0 4px 16px rgba(11,20,38,.06);
+  --shadow-lg:0 8px 32px rgba(11,20,38,.14),0 2px 8px rgba(11,20,38,.07);
+}
+
+body{font-family:var(--sans);background:var(--surface);color:var(--ink);min-height:100vh;font-size:14px;-webkit-font-smoothing:antialiased}
+
+/* ══ TOPBAR ══ */
+.topbar{
+  background:linear-gradient(135deg,var(--ink) 0%,var(--ink2) 50%,#1A3660 100%);
+  color:#fff;padding:0 24px;height:58px;
+  display:flex;align-items:center;gap:14px;
+  position:sticky;top:0;z-index:100;
+  box-shadow:0 2px 16px rgba(11,20,38,.35);
+  border-bottom:1px solid rgba(255,255,255,.07);
+}
+.tb-logo{display:flex;align-items:center;gap:10px}
+.tb-icon{
+  width:34px;height:34px;
+  background:linear-gradient(135deg,var(--teal),var(--primary));
+  border-radius:9px;display:flex;align-items:center;justify-content:center;
+  font-size:16px;flex-shrink:0;
+  box-shadow:0 2px 8px rgba(13,116,144,.4);
+}
+.tb-name{font-size:15px;font-weight:800;letter-spacing:-.3px}
+.tb-tagline{font-size:10px;color:rgba(255,255,255,.45);letter-spacing:.4px;font-weight:500;margin-top:1px}
+.tb-version{font-size:10px;background:rgba(13,116,144,.3);border:1px solid rgba(13,116,144,.5);border-radius:4px;padding:2px 8px;color:var(--teal-m);font-family:var(--mono)}
+.tb-sep{flex:1}
+.tb-muni{font-size:12px;color:rgba(255,255,255,.6);cursor:pointer;display:flex;align-items:center;gap:7px;padding:6px 12px;border-radius:7px;border:1px solid rgba(255,255,255,.1);transition:.15s;background:rgba(255,255,255,.04)}
+.tb-muni:hover{background:rgba(255,255,255,.1);color:#fff}
+.tb-muni-name{max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tb-actions{display:flex;align-items:center;gap:8px}
+.tb-btn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.85);border-radius:7px;padding:6px 13px;font-size:12px;font-family:var(--sans);cursor:pointer;transition:.15s;font-weight:600}
+.tb-btn:hover{background:rgba(255,255,255,.16);color:#fff}
+.tb-btn.primary{background:linear-gradient(135deg,var(--teal),var(--teal-d));border-color:var(--teal-d);color:#fff}
+.tb-btn.primary:hover{background:linear-gradient(135deg,var(--teal-d),#086080)}
+
+/* ══ LAYOUT ══ */
+.layout{display:flex;min-height:calc(100vh - 58px)}
+
+/* ══ SIDEBAR ══ */
+.sidebar{
+  width:228px;flex-shrink:0;
+  background:var(--white);border-right:1px solid var(--line);
+  padding:18px 10px;display:flex;flex-direction:column;gap:2px;
+  position:sticky;top:58px;height:calc(100vh - 58px);overflow-y:auto;
+}
+.sb-section{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--ink3);opacity:.38;padding:10px 10px 4px;margin-top:4px}
+.sb-item{
+  display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:8px;
+  font-size:13px;font-weight:500;color:var(--ink3);cursor:pointer;transition:.12s;border:1px solid transparent;
+}
+.sb-item:hover{background:var(--surface);color:var(--ink)}
+.sb-item.active{background:var(--primary-l);color:var(--primary);border-color:var(--primary-m);font-weight:700}
+.sb-item.active-teal{background:var(--teal-l);color:var(--teal);border-color:var(--teal-m);font-weight:700}
+.sb-item.active-res{background:var(--res-l);color:var(--res);border-color:var(--res-m);font-weight:700}
+.sb-item.active-adm{background:var(--adm-l);color:var(--adm);border-color:var(--adm-m);font-weight:700}
+.sb-item .sb-ico{font-size:15px;width:20px;text-align:center;flex-shrink:0}
+.sb-badge{margin-left:auto;background:var(--primary);color:#fff;border-radius:10px;font-size:10px;padding:1px 6px;font-weight:700;min-width:18px;text-align:center}
+.sb-badge.teal{background:var(--teal)}
+.sb-divider{height:1px;background:var(--line);margin:8px 2px}
+
+/* ══ MAIN ══ */
+.main{flex:1;padding:28px 32px;overflow-y:auto;min-width:0}
+@media(max-width:900px){.sidebar{display:none}.main{padding:16px}}
+
+/* ══ PAGE HEADER ══ */
+.page-header{margin-bottom:24px}
+.page-title{font-size:22px;font-weight:800;color:var(--ink);letter-spacing:-.5px;margin-bottom:4px}
+.page-sub{font-size:13px;color:var(--ink3);opacity:.6}
+
+/* ══ MÓDULO BANNER ══ */
+.mod-banner{
+  padding:20px 24px;border-radius:var(--radius-lg);margin-bottom:22px;
+  display:flex;align-items:center;gap:16px;border:1px solid;
+}
+.mod-banner.adm{background:linear-gradient(135deg,var(--adm-l),#D1FAE5);border-color:var(--adm-m);color:var(--adm)}
+.mod-banner.res{background:linear-gradient(135deg,var(--res-l),#EDE9FF);border-color:var(--res-m);color:var(--res)}
+.mod-banner-icon{font-size:36px}
+.mod-banner-title{font-size:18px;font-weight:800;letter-spacing:-.3px}
+.mod-banner-sub{font-size:12px;opacity:.7;margin-top:2px}
+
+/* ══ STEPS BAR ══ */
+.steps-bar{
+  background:var(--white);border:1px solid var(--line);border-radius:var(--radius-lg);
+  padding:14px 20px;margin-bottom:22px;display:flex;align-items:center;gap:0;
+}
+.step-item{display:flex;align-items:center;gap:8px;flex:1}
+.step-num{
+  width:28px;height:28px;border-radius:50%;border:2px solid var(--line2);background:var(--surface);
+  display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--ink3);flex-shrink:0;transition:.25s;
+}
+.step-label{font-size:12px;font-weight:500;color:var(--ink3);opacity:.5;transition:.25s}
+.step-item.active .step-num{border-color:var(--teal);background:var(--teal);color:#fff;box-shadow:0 0 0 3px var(--teal-m)}
+.step-item.active .step-label{color:var(--teal);opacity:1;font-weight:700}
+.step-item.done .step-num{border-color:var(--success);background:var(--success);color:#fff}
+.step-item.done .step-label{color:var(--success);opacity:1}
+.step-conn{flex:1;height:2px;background:var(--line);margin:0 4px;max-width:40px;border-radius:2px;transition:.25s}
+.step-conn.done{background:var(--success)}
+
+/* ══ CARDS ══ */
+.card{background:var(--white);border:1px solid var(--line);border-radius:var(--radius-lg);padding:24px;margin-bottom:20px;box-shadow:var(--shadow)}
+.card-title{font-size:15px;font-weight:700;color:var(--ink);margin-bottom:18px;display:flex;align-items:center;gap:9px;letter-spacing:-.2px}
+.card-title .ct-ico{width:30px;height:30px;border-radius:8px;background:var(--teal-l);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.card-title .ct-ico.adm{background:var(--adm-l)}
+.card-title .ct-ico.res{background:var(--res-l)}
+
+/* ══ DOC TYPES ══ */
+.doc-types{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:20px}
+.doc-type{border:1.5px solid var(--line);border-radius:var(--radius);padding:14px 12px;text-align:center;cursor:pointer;transition:.15s;background:var(--surface)}
+.doc-type:hover{border-color:var(--teal);background:var(--teal-l);transform:translateY(-2px);box-shadow:var(--shadow)}
+.doc-type .dt-ico{font-size:26px;margin-bottom:6px}
+.doc-type .dt-name{font-size:12px;font-weight:700;color:var(--ink)}
+.doc-type .dt-sub{font-size:11px;color:var(--ink3);opacity:.55;margin-top:2px}
+
+/* ══ UPLOAD ZONE ══ */
+.upload-zone{
+  border:2px dashed var(--line2);border-radius:var(--radius-lg);padding:40px 20px;
+  text-align:center;cursor:pointer;transition:.2s;background:var(--surface);
+}
+.upload-zone:hover,.upload-zone.drag{border-color:var(--teal);background:var(--teal-l)}
+.uz-ico{font-size:44px;margin-bottom:12px}
+.uz-title{font-size:16px;font-weight:700;margin-bottom:5px;color:var(--ink)}
+.uz-sub{font-size:13px;color:var(--ink3);opacity:.6}
+.uz-tags{display:flex;gap:6px;justify-content:center;margin-top:14px;flex-wrap:wrap}
+.uz-tag{font-size:11px;padding:3px 10px;border-radius:20px;background:var(--white);border:1px solid var(--line);color:var(--ink3);font-weight:500}
+input[type="file"]{display:none}
+.file-preview{display:none;align-items:center;gap:12px;background:var(--teal-l);border-radius:var(--radius);padding:12px 15px;margin-top:14px;border:1px solid var(--teal-m)}
+.fp-ico{font-size:26px}
+.fp-name{font-size:14px;font-weight:700;color:var(--teal);margin-bottom:2px}
+.fp-size{font-size:12px;color:var(--ink3);opacity:.6}
+#imgprev{display:none;max-width:100%;max-height:280px;border-radius:var(--radius);margin-top:14px;border:1px solid var(--line);object-fit:contain}
+
+/* ══ PLANTILLA DRIVE SECTION ══ */
+.plantilla-bar{
+  background:linear-gradient(135deg,var(--primary-l),var(--teal-l));
+  border:1px solid var(--primary-m);border-radius:var(--radius);
+  padding:14px 16px;margin-bottom:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+}
+.plantilla-bar .pb-ico{font-size:22px}
+.plantilla-bar .pb-info{flex:1}
+.plantilla-bar .pb-title{font-size:13px;font-weight:700;color:var(--primary)}
+.plantilla-bar .pb-sub{font-size:11px;color:var(--ink3);opacity:.7;margin-top:1px}
+.plantilla-select{border:1px solid var(--primary-m);border-radius:6px;padding:6px 10px;font-size:12px;font-family:var(--sans);background:var(--white);color:var(--primary);font-weight:600;cursor:pointer}
+
+/* ══ BUTTONS ══ */
+.btn{display:inline-flex;align-items:center;gap:7px;padding:10px 18px;border-radius:8px;font-size:13px;font-weight:600;border:none;cursor:pointer;transition:.15s;font-family:var(--sans)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn-primary{background:linear-gradient(135deg,var(--primary),var(--primary-d));color:#fff}
+.btn-primary:hover:not(:disabled){background:linear-gradient(135deg,var(--primary-d),#0F2057);transform:translateY(-1px);box-shadow:0 4px 14px rgba(30,58,138,.35)}
+.btn-teal{background:linear-gradient(135deg,var(--teal),var(--teal-d));color:#fff}
+.btn-teal:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 4px 14px rgba(13,116,144,.35)}
+.btn-success{background:var(--success);color:#fff}
+.btn-success:hover:not(:disabled){background:#054F39;transform:translateY(-1px)}
+.btn-ghost{background:var(--surface);color:var(--ink3);border:1px solid var(--line)}
+.btn-ghost:hover:not(:disabled){background:var(--surface2);border-color:var(--line2)}
+.btn-danger{background:var(--danger-l);color:var(--danger);border:1px solid var(--danger-m)}
+.btn-danger:hover:not(:disabled){background:#fee2e2}
+.btn-res{background:linear-gradient(135deg,var(--res),#3B157E);color:#fff}
+.btn-res:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 4px 14px rgba(76,29,149,.35)}
+.btn-adm{background:linear-gradient(135deg,var(--adm),#054F39);color:#fff}
+.btn-adm:hover:not(:disabled){transform:translateY(-1px)}
+.btn-row{display:flex;gap:9px;flex-wrap:wrap;margin-top:16px}
+
+/* ══ PROCESSING ══ */
+.proc-box{text-align:center;padding:40px 20px}
+.spinner{width:52px;height:52px;border:4px solid var(--line2);border-top-color:var(--teal);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 18px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.proc-title{font-size:17px;font-weight:700;margin-bottom:6px}
+.proc-sub{font-size:13px;color:var(--ink3);opacity:.6}
+.proc-steps{text-align:left;max-width:320px;margin:22px auto 0;display:flex;flex-direction:column;gap:0}
+.ps-item{display:flex;align-items:center;gap:10px;padding:8px 12px;font-size:13px;color:var(--line2);border-radius:6px;transition:.3s}
+.ps-item.done{color:var(--success);background:var(--success-l)}
+.ps-item.active{color:var(--teal);background:var(--teal-l);font-weight:600}
+.ps-dot{width:8px;height:8px;border-radius:50%;background:currentColor;flex-shrink:0}
+.ps-item.active .ps-dot{animation:pulse .8s ease infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.2}}
+
+/* ══ TIPO BADGE ══ */
+.tipo-badge{display:inline-flex;align-items:center;gap:7px;padding:6px 14px;border-radius:20px;font-size:13px;font-weight:700;margin-bottom:16px}
+.tb-oc{background:var(--teal-l);color:var(--teal)}
+.tb-os{background:var(--res-l);color:var(--res)}
+.tb-der{background:var(--amber-l);color:var(--amber)}
+.tb-otro{background:var(--surface2);color:var(--ink3)}
+
+/* ══ VALIDATION ══ */
+.val-box{border-radius:var(--radius);padding:14px 16px;margin-bottom:16px;border:1px solid}
+.val-ok{background:var(--success-l);border-color:var(--success-m)}
+.val-warn{background:var(--warn-l);border-color:var(--warn-m)}
+.val-err{background:var(--danger-l);border-color:var(--danger-m)}
+.val-title{font-size:13px;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:7px}
+.val-items{display:flex;gap:6px;flex-wrap:wrap}
+.val-item{font-size:12px;padding:3px 10px;border-radius:20px;background:rgba(255,255,255,.7);font-weight:500}
+
+/* ══ AGENTE VALIDADOR ══ */
+.agente-box{
+  border-radius:var(--radius);padding:16px 18px;margin-bottom:16px;
+  border:1.5px solid var(--primary-m);
+  background:linear-gradient(135deg,var(--primary-l),var(--teal-l));
+}
+.agente-title{font-size:13px;font-weight:700;color:var(--primary);margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.agente-loading{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--teal)}
+.agente-dot{width:6px;height:6px;border-radius:50%;background:var(--teal);animation:pulse .7s ease infinite}
+.agente-result{font-size:13px;line-height:1.7;color:var(--ink)}
+.agente-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;margin-right:6px;margin-bottom:4px}
+.ab-ok{background:var(--success-l);color:var(--success);border:1px solid var(--success-m)}
+.ab-warn{background:var(--warn-l);color:var(--warn);border:1px solid var(--warn-m)}
+.ab-err{background:var(--danger-l);color:var(--danger);border:1px solid var(--danger-m)}
+
+/* ══ DATA GRID ══ */
+.data-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin-bottom:16px}
+.data-item{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 13px}
+.di-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--ink3);opacity:.5;margin-bottom:3px}
+.di-val{font-size:13px;font-weight:600;color:var(--ink);word-break:break-word}
+
+/* ══ SHEET PREVIEW ══ */
+.sheet-preview{background:var(--primary-l);border:1px solid var(--primary-m);border-radius:var(--radius);padding:14px 16px;margin-bottom:16px}
+.sp-title{font-size:12px;font-weight:700;color:var(--primary);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.sp-cols{display:flex;gap:6px;flex-wrap:wrap}
+.sp-col{background:var(--white);border:1px solid var(--primary-m);border-radius:6px;padding:6px 10px;min-width:100px}
+.sp-h{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--primary);margin-bottom:2px}
+.sp-v{font-size:12px;color:var(--ink);font-weight:500;word-break:break-word}
+
+/* ══ INF NUMBER INPUT ══ */
+.inf-num-row{display:flex;align-items:center;gap:10px;background:var(--amber-l);border:1px solid var(--amber-m);border-radius:var(--radius);padding:12px 16px;margin-bottom:16px}
+.inf-num-row label{font-size:13px;font-weight:700;color:var(--amber);white-space:nowrap}
+.inf-num-row input{width:90px;border:1px solid var(--amber-m);border-radius:6px;padding:7px 10px;font-size:14px;font-weight:700;font-family:var(--mono);text-align:center;background:#fff}
+.inf-num-row .inf-hint{font-size:12px;color:var(--amber);opacity:.8}
+.inf-num-auto{font-size:11px;background:var(--teal-l);border:1px solid var(--teal-m);color:var(--teal);border-radius:20px;padding:2px 10px;font-weight:700;white-space:nowrap}
+
+/* ══ DRAFT ══ */
+.draft-wrap{margin-bottom:16px}
+.draft-head{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--ink2);border-radius:var(--radius) var(--radius) 0 0}
+.draft-head span{font-size:12px;font-weight:600;color:rgba(255,255,255,.7)}
+.draft-actions{display:flex;gap:6px}
+.draft-btn{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.8);border-radius:5px;padding:4px 10px;font-size:11px;font-family:var(--sans);cursor:pointer;transition:.15s;font-weight:500}
+.draft-btn:hover{background:rgba(255,255,255,.2);color:#fff}
+#draft{
+  width:100%;min-height:380px;border:1px solid var(--line);border-top:none;
+  border-radius:0 0 var(--radius) var(--radius);padding:18px 20px;
+  font-family:var(--mono);font-size:12.5px;line-height:2;color:var(--ink);background:#FAFBFC;
+  resize:vertical;outline:none;
+}
+#draft:focus{border-color:var(--teal);background:#fff}
+
+/* ══ CHAT ══ */
+.chat-box{border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;margin-top:16px}
+.chat-head{background:var(--ink2);color:#fff;padding:10px 14px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px}
+.chat-msgs{padding:12px;min-height:80px;max-height:200px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;background:#FAFBFC}
+.msg{padding:9px 13px;border-radius:10px;font-size:13px;max-width:88%;line-height:1.6}
+.msg-ai{background:var(--teal-l);color:var(--ink);align-self:flex-start;border-bottom-left-radius:2px;border:1px solid var(--teal-m)}
+.msg-user{background:linear-gradient(135deg,var(--primary),var(--teal));color:#fff;align-self:flex-end;border-bottom-right-radius:2px;font-weight:500}
+.chat-input{display:flex;border-top:1px solid var(--line)}
+.chat-input input{flex:1;border:none;padding:11px 14px;font-size:13px;font-family:var(--sans);background:#fff;outline:none;color:var(--ink)}
+.chat-input input::placeholder{color:var(--ink3);opacity:.4}
+.chat-send{background:linear-gradient(135deg,var(--teal),var(--teal-d));color:#fff;border:none;padding:11px 16px;cursor:pointer;font-size:15px;transition:.15s}
+.chat-send:hover{background:var(--teal-d)}
+
+/* ══ SUCCESS BANNER ══ */
+.success-banner{background:var(--success-l);border:1px solid var(--success-m);border-radius:var(--radius-lg);padding:20px 24px;text-align:center;margin-bottom:16px}
+.sb-check{font-size:44px;margin-bottom:8px}
+.sb-title{font-size:18px;font-weight:800;color:var(--success);margin-bottom:4px}
+.sb-desc{font-size:13px;color:#054F39;opacity:.85}
+.actions-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+.action-item{border:1px solid var(--line);border-radius:var(--radius);padding:14px;text-align:center;font-size:12px;color:var(--ink3);transition:.4s;background:var(--white)}
+.action-item .ai-ico{font-size:24px;margin-bottom:6px}
+.action-item.ok{border-color:var(--success-m);background:var(--success-l);color:var(--success);font-weight:600}
+
+/* ══ HISTORY TABLE ══ */
+.hist-wrap{overflow-x:auto;border-radius:var(--radius);border:1px solid var(--line)}
+table.hist{width:100%;border-collapse:collapse;font-size:12.5px}
+table.hist th{background:var(--surface);padding:8px 12px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--ink3);opacity:.6;border-bottom:1px solid var(--line)}
+table.hist td{padding:9px 12px;border-bottom:1px solid var(--surface2);color:var(--ink)}
+table.hist tr:last-child td{border-bottom:none}
+table.hist tr:hover td{background:var(--surface)}
+.pill{font-size:11px;padding:2px 9px;border-radius:20px;font-weight:700;white-space:nowrap}
+.pill-oc{background:var(--teal-l);color:var(--teal)}
+.pill-os{background:var(--res-l);color:var(--res)}
+.pill-der{background:var(--amber-l);color:var(--amber)}
+.pill-mem{background:var(--adm-l);color:var(--adm)}
+.hist-empty{text-align:center;padding:28px;font-size:13px;color:var(--ink3);opacity:.5}
+
+/* ══ STATUS MSG ══ */
+.status-msg{font-size:13px;padding:10px 14px;border-radius:8px;margin-bottom:12px;border:1px solid;display:flex;align-items:center;gap:8px;font-weight:500}
+.st-ok{background:var(--success-l);border-color:var(--success-m);color:var(--success)}
+.st-err{background:var(--danger-l);border-color:var(--danger-m);color:var(--danger)}
+.st-info{background:var(--primary-l);border-color:var(--primary-m);color:var(--primary)}
+.st-teal{background:var(--teal-l);border-color:var(--teal-m);color:var(--teal)}
+
+/* ══ CONFIG ══ */
+.cfg-tabs{display:flex;gap:4px;margin-bottom:20px;background:var(--white);border:1px solid var(--line);border-radius:var(--radius-lg);padding:5px;flex-wrap:wrap}
+.cfg-tab{flex:1;min-width:100px;padding:9px 12px;border:none;border-radius:8px;font-size:12px;font-weight:600;font-family:var(--sans);cursor:pointer;background:transparent;color:var(--ink3);transition:.15s;white-space:nowrap}
+.cfg-tab:hover{background:var(--surface);color:var(--ink)}
+.cfg-tab.active{background:linear-gradient(135deg,var(--primary),var(--teal-d));color:#fff;box-shadow:0 2px 8px rgba(30,58,138,.25)}
+.cfg-pane{display:none}
+.cfg-pane.show{display:block}
+.cfg-2col{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.cfg-field{display:flex;flex-direction:column;gap:5px}
+.cfg-field.full{grid-column:1/-1}
+.cfg-lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.35px;color:var(--ink3)}
+.cfg-input{border:1px solid var(--line);border-radius:6px;padding:8px 11px;font-size:13px;font-family:var(--sans);background:var(--white);width:100%}
+.cfg-input:focus{outline:2px solid var(--teal-m);outline-offset:0;border-color:var(--teal)}
+.cfg-input.filled{border-color:var(--success-m);background:var(--success-l)}
+.drive-card{border:1.5px solid var(--line);border-radius:var(--radius);padding:16px;transition:.2s;background:var(--white)}
+.drive-card.connected{border-color:var(--success-m);background:var(--success-l)}
+.drive-card-head{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.drive-icon{font-size:22px;width:38px;height:38px;background:var(--surface2);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.drive-name{font-size:13px;font-weight:700;color:var(--ink);margin-bottom:2px}
+.drive-sub{font-size:11px;color:var(--ink3);opacity:.6}
+.conn-badge{font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;background:var(--surface2);color:var(--ink3);white-space:nowrap;border:1px solid var(--line);transition:.2s}
+.conn-badge.ok{background:var(--success-l);color:var(--success);border-color:var(--success-m)}
+.drive-input-row{display:flex;gap:8px;align-items:center}
+.btn-drive-open{display:flex;align-items:center;gap:5px;padding:7px 12px;border:1.5px solid var(--teal-m);border-radius:6px;background:var(--teal-l);color:var(--teal);font-size:12px;font-weight:700;font-family:var(--sans);cursor:pointer;white-space:nowrap;transition:.15s;flex-shrink:0}
+.btn-drive-open:hover{background:var(--teal);color:#fff;border-color:var(--teal)}
+.drive-status{margin-top:8px;font-size:12px}
+.cfg-help-box{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:14px;margin-top:12px}
+.sheet-structure-preview{background:var(--primary-l);border:1px solid var(--primary-m);border-radius:var(--radius);padding:14px 16px;margin-bottom:16px}
+.sheet-cols-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.sheet-col-chip{background:var(--white);border:1px solid var(--primary-m);border-radius:6px;padding:6px 10px;min-width:70px;text-align:center;font-size:11px;font-weight:800;color:var(--primary);line-height:1.4}
+.sheet-col-chip span{display:block;font-size:10px;font-weight:500;color:var(--ink3)}
+.conn-status-box{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-bottom:16px;display:flex;flex-direction:column;gap:10px}
+.conn-row{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:7px;background:var(--white);border:1px solid var(--line)}
+.conn-dot{width:10px;height:10px;border-radius:50%;background:var(--line2);flex-shrink:0;transition:.3s}
+.conn-dot.ok{background:var(--success)}
+.conn-dot.err{background:var(--danger)}
+.conn-dot.warn{background:var(--warn-m)}
+.conn-label{font-size:12px;font-weight:600;color:var(--ink3);flex:1}
+.conn-val{font-size:11px;color:var(--ink3);opacity:.6;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cfg-resumen-item{display:flex;align-items:flex-start;gap:10px;padding:9px 12px;border-radius:7px;margin-bottom:6px;border:1px solid var(--line);background:var(--surface)}
+.cri-ico{font-size:15px;flex-shrink:0;margin-top:1px}
+.cri-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;color:var(--ink3);margin-bottom:2px}
+.cri-val{font-size:12px;color:var(--ink);word-break:break-all}
+.cri-none{font-size:12px;color:var(--danger);font-style:italic}
+
+/* ══ GUIA ══ */
+.guide-step{display:flex;gap:14px;margin-bottom:16px}
+.gs-num{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--teal),var(--primary));color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;margin-top:1px}
+.gs-content{flex:1}
+.gs-title{font-size:13px;font-weight:700;margin-bottom:3px}
+.gs-desc{font-size:13px;color:var(--ink3);opacity:.7;line-height:1.6}
+.code-block{background:var(--ink);color:#e2e8f0;border-radius:var(--radius);padding:16px;font-family:var(--mono);font-size:11.5px;line-height:1.7;white-space:pre;overflow-x:auto;margin-top:10px}
+
+/* ══ MODAL ══ */
+.modal-overlay{position:fixed;inset:0;background:rgba(11,20,38,.55);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:.2s;backdrop-filter:blur(2px)}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{background:var(--white);border-radius:var(--radius-lg);padding:28px;width:100%;max-width:600px;max-height:90vh;overflow-y:auto;transform:translateY(16px);transition:.2s;box-shadow:var(--shadow-lg)}
+.modal-overlay.open .modal{transform:translateY(0)}
+.modal-title{font-size:17px;font-weight:800;margin-bottom:20px;display:flex;align-items:center;gap:9px;letter-spacing:-.3px}
+.modal-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
+.modal-field{display:flex;flex-direction:column;gap:5px}
+.modal-field.full{grid-column:1/-1}
+.modal-field label{font-size:12px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.3px}
+.modal-field input,.modal-field select{border:1px solid var(--line);border-radius:7px;padding:9px 12px;font-size:13px;font-family:var(--sans);background:var(--white)}
+.modal-field input:focus,.modal-field select:focus{outline:2px solid var(--teal-m);outline-offset:0;border-color:var(--teal)}
+.modal-note{background:var(--teal-l);border-radius:8px;padding:12px;font-size:12px;color:var(--teal);margin-bottom:20px;border:1px solid var(--teal-m)}
+.modal-btns{display:flex;gap:9px;justify-content:flex-end}
+
+/* ══ RESIDENCIA ══ */
+.res-doc-types{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:20px}
+.res-doc-type{border:1.5px solid var(--line);border-radius:var(--radius);padding:14px 12px;text-align:center;cursor:pointer;transition:.15s;background:var(--surface)}
+.res-doc-type:hover,.res-doc-type.selected{border-color:var(--res);background:var(--res-l);transform:translateY(-2px);box-shadow:var(--shadow)}
+.res-doc-type.selected{border-width:2px;font-weight:700}
+.res-doc-type .rdt-ico{font-size:24px;margin-bottom:5px}
+.res-doc-type .rdt-name{font-size:12px;font-weight:700;color:var(--ink)}
+.res-form{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.res-field{display:flex;flex-direction:column;gap:5px}
+.res-field.full{grid-column:1/-1}
+.res-lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.35px;color:var(--ink3)}
+.res-input{border:1px solid var(--line);border-radius:6px;padding:8px 11px;font-size:13px;font-family:var(--sans);background:var(--white);width:100%}
+.res-input:focus{outline:2px solid var(--res-m);outline-offset:0;border-color:var(--res)}
+.res-textarea{border:1px solid var(--line);border-radius:6px;padding:8px 11px;font-size:13px;font-family:var(--sans);background:var(--white);width:100%;min-height:120px;resize:vertical;line-height:1.7}
+.res-textarea:focus{outline:2px solid var(--res-m);outline-offset:0;border-color:var(--res)}
+.res-img-zone{border:2px dashed var(--line2);border-radius:var(--radius);padding:24px;text-align:center;cursor:pointer;transition:.2s;background:var(--surface);margin-top:4px}
+.res-img-zone:hover{border-color:var(--res);background:var(--res-l)}
+.res-img-preview{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.res-img-thumb{position:relative;width:80px;height:80px;border-radius:8px;overflow:hidden;border:2px solid var(--line)}
+.res-img-thumb img{width:100%;height:100%;object-fit:cover}
+.res-img-thumb .del{position:absolute;top:2px;right:2px;background:var(--danger);color:#fff;border:none;border-radius:50%;width:18px;height:18px;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700}
+
+/* ══ ADMIN ══ */
+.adm-quick-actions{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:20px}
+.adm-action{border:1.5px solid var(--line);border-radius:var(--radius-lg);padding:18px 16px;cursor:pointer;transition:.2s;background:var(--white);text-align:center}
+.adm-action:hover{border-color:var(--adm-m);background:var(--adm-l);transform:translateY(-2px);box-shadow:var(--shadow)}
+.adm-action .aa-ico{font-size:30px;margin-bottom:8px}
+.adm-action .aa-name{font-size:13px;font-weight:700;color:var(--ink);margin-bottom:3px}
+.adm-action .aa-sub{font-size:11px;color:var(--ink3);opacity:.6}
+.adm-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:20px}
+.adm-stat{background:var(--white);border:1px solid var(--line);border-radius:var(--radius);padding:16px;text-align:center}
+.adm-stat .as-val{font-size:28px;font-weight:800;color:var(--primary);margin-bottom:4px;font-family:var(--mono)}
+.adm-stat .as-label{font-size:11px;color:var(--ink3);opacity:.6;font-weight:600;text-transform:uppercase;letter-spacing:.4px}
+
+/* ══ ALERT ══ */
+.alert{border-radius:var(--radius);padding:12px 16px;margin-bottom:16px;font-size:13px;font-weight:500;display:flex;align-items:flex-start;gap:9px;border:1px solid}
+.alert-warn{background:var(--warn-l);border-color:var(--warn-m);color:var(--warn)}
+.alert-info{background:var(--teal-l);border-color:var(--teal-m);color:var(--teal)}
+.alert-res{background:var(--res-l);border-color:var(--res-m);color:var(--res)}
+
+/* ══ API BAR FLOTANTE ══ */
+.api-bar{background:var(--amber-l);border:1px solid var(--amber-m);border-radius:var(--radius);padding:12px 16px;margin-bottom:20px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.api-bar label{font-size:13px;font-weight:700;color:var(--amber);white-space:nowrap}
+.api-bar input{flex:1;min-width:160px;border:1px solid var(--amber-m);border-radius:6px;padding:7px 11px;font-size:13px;font-family:var(--mono);background:#fff}
+
+/* ══ PANELS ══ */
+.panel{display:none}.panel.show{display:block}
+.tab{display:none}.tab.show{display:block}
+
+/* ══ SCROLLBAR ══ */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--line2);border-radius:10px}
+</style>
+</head>
+<body>
+
+<!-- ══════════════ TOPBAR ══════════════ -->
+<div class="topbar">
+  <div class="tb-logo">
+    <div class="tb-icon">🏛️</div>
+    <div>
+      <div class="tb-name">GesDoc PE</div>
+      <div class="tb-tagline">GESTIÓN DOCUMENTAL SECTORIAL</div>
+    </div>
+    <span class="tb-version">v7.0</span>
+  </div>
+  <div class="tb-sep"></div>
+  <div class="tb-muni" onclick="showPanel('config')" title="Configuración">
+    <span>🏛️</span>
+    <span class="tb-muni-name" id="tb-muni-label">Sin entidad configurada</span>
+    <span style="opacity:.5">▾</span>
+  </div>
+  <div class="tb-actions">
+    <button class="tb-btn" onclick="showPanel('hist')">📋 Historial</button>
+    <button class="tb-btn primary" onclick="showPanel('nuevo')">➕ Nuevo informe</button>
+  </div>
+</div>
+
+<!-- ══════════════ LAYOUT ══════════════ -->
+<div class="layout">
+  <nav class="sidebar">
+    <div class="sb-section">Documentos</div>
+    <div class="sb-item" id="nav-nuevo" onclick="showPanel('nuevo')">
+      <span class="sb-ico">➕</span> Nuevo informe
+    </div>
+    <div class="sb-item" id="nav-hist" onclick="showPanel('hist')">
+      <span class="sb-ico">📋</span> Historial
+      <span class="sb-badge" id="hist-badge" style="display:none">0</span>
+    </div>
+
+    <div class="sb-divider"></div>
+    <div class="sb-section">Módulos</div>
+    <div class="sb-item" id="nav-admin" onclick="showPanel('admin')">
+      <span class="sb-ico">🏢</span> Administrativo
+      <span class="sb-badge teal" id="adm-badge" style="display:none">0</span>
+    </div>
+    <div class="sb-item" id="nav-residencia" onclick="showPanel('residencia')">
+      <span class="sb-ico">🏗️</span> Residencia
+      <span class="sb-badge" id="res-badge" style="display:none;background:var(--res)">0</span>
+    </div>
+
+    <div class="sb-divider"></div>
+    <div class="sb-section">Sistema</div>
+    <div class="sb-item" id="nav-config" onclick="showPanel('config')">
+      <span class="sb-ico">⚙️</span> Configuración
+      <span class="sb-badge cfg-badge" id="cfg-badge" style="display:none;background:var(--warn)">!</span>
+    </div>
+    <div class="sb-item" onclick="showPanel('guia')">
+      <span class="sb-ico">📖</span> Guía Apps Script
+    </div>
+    <div class="sb-item" id="nav-apiconf" onclick="showPanel('apiconf')">
+      <span class="sb-ico">🔑</span> API Gemini
+    </div>
+  </nav>
+
+  <main class="main">
+
+    <!-- ════════════════════════════════════════
+         ① NUEVO INFORME (O/C, O/S, Derivación)
+    ════════════════════════════════════════ -->
+    <div class="panel" id="panel-nuevo">
+      <div class="page-header">
+        <div class="page-title">Nuevo informe oficial</div>
+        <div class="page-sub">Sube el expediente — el sistema extrae los datos y genera el informe respetando tu plantilla</div>
+      </div>
+
+      <div class="alert alert-warn" id="alert-perfil" style="display:none">
+        ⚠️ <div><strong>Configura tu entidad primero.</strong> Sin estos datos el informe no tendrá los nombres correctos. <a href="#" onclick="abrirPerfil();return false" style="color:var(--warn);text-decoration:underline">Configurar ahora →</a></div>
+      </div>
+
+      <div class="steps-bar">
+        <div class="step-item" id="st1"><div class="step-num">1</div><span class="step-label">Subir</span></div>
+        <div class="step-conn" id="sc1"></div>
+        <div class="step-item" id="st2"><div class="step-num">2</div><span class="step-label">Procesando</span></div>
+        <div class="step-conn" id="sc2"></div>
+        <div class="step-item" id="st3"><div class="step-num">3</div><span class="step-label">Revisar</span></div>
+        <div class="step-conn" id="sc3"></div>
+        <div class="step-item" id="st4"><div class="step-num">4</div><span class="step-label">Confirmar</span></div>
+        <div class="step-conn" id="sc4"></div>
+        <div class="step-item" id="st5"><div class="step-num">✓</div><span class="step-label">Listo</span></div>
+      </div>
+
+      <!-- PASO 1: SUBIR -->
+      <div class="panel show" id="p1">
+        <div class="card">
+          <div class="card-title"><div class="ct-ico">📁</div> Sube el expediente</div>
+
+          <!-- PLANTILLA EN DRIVE -->
+          <div class="plantilla-bar" id="plantilla-bar">
+            <div class="pb-ico">📋</div>
+            <div class="pb-info">
+              <div class="pb-title">Plantilla Drive conectada</div>
+              <div class="pb-sub" id="plantilla-label">El informe se generará copiando y completando tu plantilla oficial</div>
+            </div>
+            <select class="plantilla-select" id="plantilla-tipo">
+              <option value="oc">Conformidad O/C</option>
+              <option value="os">Conformidad O/S</option>
+              <option value="der">Derivación</option>
+            </select>
+          </div>
+
+          <div style="font-size:13px;font-weight:600;color:var(--ink3);margin-bottom:12px;opacity:.7">Tipos de documento que el sistema detecta automáticamente:</div>
+          <div class="doc-types">
+            <div class="doc-type"><div class="dt-ico">📦</div><div class="dt-name">Conformidad O/C</div><div class="dt-sub">Orden de Compra</div></div>
+            <div class="doc-type"><div class="dt-ico">🔧</div><div class="dt-name">Conformidad O/S</div><div class="dt-sub">Orden de Servicio</div></div>
+            <div class="doc-type"><div class="dt-ico">📨</div><div class="dt-name">Derivación</div><div class="dt-sub">Remisión de expediente</div></div>
+            <div class="doc-type"><div class="dt-ico">📋</div><div class="dt-name">Otro</div><div class="dt-sub">El sistema detecta</div></div>
+          </div>
+
+          <label for="fileinput">
+            <div class="upload-zone" id="uzone">
+              <div class="uz-ico">📤</div>
+              <div class="uz-title">Arrastra aquí o haz clic para seleccionar</div>
+              <div class="uz-sub">Foto del celular, PDF escaneado, Word — cualquier formato</div>
+              <div class="uz-tags">
+                <span class="uz-tag">📄 PDF</span>
+                <span class="uz-tag">🖼️ JPG / PNG</span>
+                <span class="uz-tag">📱 Foto celular</span>
+                <span class="uz-tag">📝 DOCX</span>
+              </div>
+            </div>
+          </label>
+          <input type="file" id="fileinput" accept=".pdf,.png,.jpg,.jpeg,.webp,.docx">
+          <img id="imgprev" alt="Vista previa">
+          <div class="file-preview" id="fprev">
+            <div class="fp-ico" id="ficon">📄</div>
+            <div style="flex:1">
+              <div class="fp-name" id="fname">—</div>
+              <div class="fp-size" id="fsize">—</div>
+            </div>
+            <button class="btn btn-ghost" onclick="limpiarArchivo()" style="padding:5px 10px;font-size:12px">✕ Quitar</button>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-teal" id="btnproc" onclick="procesar()" disabled>
+              🔍 Analizar con Gemini
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- PASO 2: PROCESANDO -->
+      <div class="panel" id="p2">
+        <div class="card">
+          <div class="proc-box">
+            <div class="spinner"></div>
+            <div class="proc-title">Analizando el expediente...</div>
+            <div class="proc-sub">Extrae datos, detecta tipo y completa tu plantilla oficial</div>
+            <div class="proc-steps">
+              <div class="ps-item done" id="ps1"><div class="ps-dot"></div> Leyendo el archivo</div>
+              <div class="ps-item" id="ps2"><div class="ps-dot"></div> Detectando tipo de documento</div>
+              <div class="ps-item" id="ps3"><div class="ps-dot"></div> Extrayendo datos del expediente</div>
+              <div class="ps-item" id="ps4"><div class="ps-dot"></div> Validando coincidencias</div>
+              <div class="ps-item" id="ps5"><div class="ps-dot"></div> Completando plantilla oficial</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PASO 3: REVISIÓN -->
+      <div class="panel" id="p3">
+        <div class="card">
+          <div class="card-title"><div class="ct-ico">🔍</div> Revisión del informe generado</div>
+
+          <div id="tipobadge"></div>
+
+          <!-- VALIDACIÓN IA AGENTE -->
+          <div class="agente-box" id="agente-box" style="display:none">
+            <div class="agente-title">🤖 Agente Validador — revisión de coherencia</div>
+            <div class="agente-loading" id="agente-loading"><div class="agente-dot"></div> Validando que el informe tenga sentido...</div>
+            <div class="agente-result" id="agente-result" style="display:none"></div>
+          </div>
+
+          <!-- INCONSISTENCIAS -->
+          <div id="vbox"></div>
+
+          <!-- NÚMERO DE INFORME -->
+          <div class="inf-num-row">
+            <label>📝 N° de Informe:</label>
+            <input type="text" id="numInforme" placeholder="001" maxlength="6" oninput="actualizarNumInf()">
+            <span class="inf-num-auto" id="num-auto-badge" style="display:none">Auto ✓</span>
+            <span class="inf-hint">Número correlativo (el sistema sugiere el siguiente)</span>
+          </div>
+
+          <!-- DATOS EXTRAÍDOS -->
+          <div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:10px;display:flex;align-items:center;gap:7px">📊 Datos extraídos del expediente</div>
+          <div class="data-grid" id="dgrid"></div>
+
+          <!-- SHEET PREVIEW -->
+          <div class="sheet-preview">
+            <div class="sp-title">📋 Vista previa — fila que se registrará en el Sheet</div>
+            <div class="sp-cols" id="scols"></div>
+          </div>
+
+          <!-- BORRADOR -->
+          <div class="draft-wrap">
+            <div class="draft-head">
+              <span>📄 Informe generado — editable directamente</span>
+              <div class="draft-actions">
+                <button class="draft-btn" onclick="copiar()">📋 Copiar</button>
+                <button class="draft-btn" onclick="descargarWord()">⬇ Word</button>
+              </div>
+            </div>
+            <textarea id="draft" spellcheck="true"></textarea>
+          </div>
+
+          <!-- CHAT CORRECCIONES -->
+          <div class="chat-box">
+            <div class="chat-head">💬 Correcciones — dile qué cambiar</div>
+            <div class="chat-msgs" id="cmsgs">
+              <div class="msg msg-ai">Revisa el informe. Si algo está incorrecto dímelo aquí. Ej: <em>"El monto es S/ 3,200.00"</em> · <em>"Cambia el destinatario a..."</em></div>
+            </div>
+            <div class="chat-input">
+              <input type="text" id="cinput" placeholder="Ej: El nombre del proveedor está mal · Cambia la meta...">
+              <button class="chat-send" onclick="chat()">➤</button>
+            </div>
+          </div>
+
+          <div class="btn-row">
+            <button class="btn btn-success" onclick="confirmar()">✅ Confirmar y registrar</button>
+            <button class="btn btn-ghost" onclick="resetNuevo()">↩ Nuevo documento</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- PASO 4: LISTO -->
+      <div class="panel" id="p4">
+        <div class="card">
+          <div class="success-banner">
+            <div class="sb-check">✅</div>
+            <div class="sb-title">Informe procesado correctamente</div>
+            <div class="sb-desc" id="sdesc">Procesado y registrado</div>
+          </div>
+          <div class="actions-grid">
+            <div class="action-item" id="ac1"><div class="ai-ico">💾</div>Descargando Word...</div>
+            <div class="action-item" id="ac2"><div class="ai-ico">📊</div>Registrando en Sheet...</div>
+            <div class="action-item" id="ac3"><div class="ai-ico">📁</div>Guardando en Drive...</div>
+          </div>
+          <div id="stdiv"></div>
+          <div class="btn-row">
+            <button class="btn btn-teal" onclick="resetNuevo()">➕ Procesar otro documento</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════
+         ② HISTORIAL
+    ════════════════════════════════════════ -->
+    <div class="panel" id="panel-hist">
+      <div class="page-header">
+        <div class="page-title">Historial de informes</div>
+        <div class="page-sub">Todos los informes generados en esta sesión y sesiones anteriores</div>
+      </div>
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+          <div class="card-title" style="margin:0"><div class="ct-ico">📋</div> Informes emitidos</div>
+          <button class="btn btn-ghost" onclick="exportCSV()" style="font-size:12px">📥 Exportar CSV</button>
+        </div>
+        <div class="hist-wrap">
+          <table class="hist">
+            <thead><tr>
+              <th>Nº INF.</th><th>Tipo</th><th>Remitente / Asunto</th><th>N° OC/OS</th><th>Monto</th><th>Fecha</th><th>Estado</th>
+            </tr></thead>
+            <tbody id="hbody"></tbody>
+          </table>
+          <div id="hvacio" class="hist-empty">Sin registros aún</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════
+         ③ ADMINISTRATIVO
+    ════════════════════════════════════════ -->
+    <div class="panel" id="panel-admin">
+      <div class="mod-banner adm">
+        <div class="mod-banner-icon">🏢</div>
+        <div>
+          <div class="mod-banner-title">Módulo Administrativo</div>
+          <div class="mod-banner-sub">Gestión de documentos de oficina: memorándums, oficios, circulares, proveídos</div>
+        </div>
+      </div>
+      <div id="adm-conn-warn" class="alert alert-warn" style="display:none">
+        ⚠️ <div><strong>Conexión incompleta.</strong> <span id="adm-conn-warn-msg"></span> <a href="#" onclick="showPanel('config');switchCfgTab('webapp');return false" style="color:var(--warn);text-decoration:underline">Configurar →</a></div>
+      </div>
+
+      <div class="adm-stats">
+        <div class="adm-stat"><div class="as-val" id="adm-stat-total">0</div><div class="as-label">Doc. emitidos</div></div>
+        <div class="adm-stat"><div class="as-val" id="adm-stat-mes">0</div><div class="as-label">Este mes</div></div>
+        <div class="adm-stat"><div class="as-val" id="adm-stat-pendientes">0</div><div class="as-label">Pendientes</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><div class="ct-ico adm">🏢</div> Generar documento administrativo</div>
+        <div style="font-size:13px;font-weight:600;color:var(--ink3);margin-bottom:14px;opacity:.7">Selecciona el tipo de documento:</div>
+        <div class="adm-quick-actions">
+          <div class="adm-action" onclick="abrirDocAdmin('memorandum')">
+            <div class="aa-ico">📝</div>
+            <div class="aa-name">Memorándum</div>
+            <div class="aa-sub">Comunicación interna</div>
+          </div>
+          <div class="adm-action" onclick="abrirDocAdmin('oficio')">
+            <div class="aa-ico">📨</div>
+            <div class="aa-name">Oficio</div>
+            <div class="aa-sub">Comunicación externa</div>
+          </div>
+          <div class="adm-action" onclick="abrirDocAdmin('circular')">
+            <div class="aa-ico">📢</div>
+            <div class="aa-name">Circular</div>
+            <div class="aa-sub">Comunicación masiva</div>
+          </div>
+          <div class="adm-action" onclick="abrirDocAdmin('proveido')">
+            <div class="aa-ico">✍️</div>
+            <div class="aa-name">Proveído</div>
+            <div class="aa-sub">Trámite y derivación</div>
+          </div>
+          <div class="adm-action" onclick="abrirDocAdmin('resolucion')">
+            <div class="aa-ico">⚖️</div>
+            <div class="aa-name">Resolución</div>
+            <div class="aa-sub">Acto administrativo</div>
+          </div>
+          <div class="adm-action" onclick="abrirDocAdmin('informe_adm')">
+            <div class="aa-ico">📊</div>
+            <div class="aa-name">Informe Adm.</div>
+            <div class="aa-sub">Informe de gestión</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FORMULARIO DOC ADMINISTRATIVO -->
+      <div class="card" id="adm-form-card" style="display:none">
+        <div class="card-title"><div class="ct-ico adm" id="adm-form-ico">📝</div> <span id="adm-form-titulo">Memorándum</span></div>
+        <div class="res-form" style="grid-template-columns:1fr 1fr">
+          <div class="res-field">
+            <label class="res-lbl">N° de Documento</label>
+            <input class="res-input" id="adm-num" placeholder="Ej: 001">
+          </div>
+          <div class="res-field">
+            <label class="res-lbl">Fecha</label>
+            <input class="res-input" type="date" id="adm-fecha">
+          </div>
+          <div class="res-field">
+            <label class="res-lbl">Para / Destinatario</label>
+            <input class="res-input" id="adm-para" placeholder="Nombre y cargo del destinatario">
+          </div>
+          <div class="res-field">
+            <label class="res-lbl">De / Remitente</label>
+            <input class="res-input" id="adm-de" placeholder="Nombre y cargo del remitente">
+          </div>
+          <div class="res-field full">
+            <label class="res-lbl">Asunto</label>
+            <input class="res-input" id="adm-asunto" placeholder="Asunto del documento">
+          </div>
+          <div class="res-field full">
+            <label class="res-lbl">Cuerpo del documento</label>
+            <textarea class="res-textarea" id="adm-cuerpo" placeholder="Redacta el cuerpo del documento o déjalo en blanco para que el sistema lo genere..."></textarea>
+          </div>
+          <div class="res-field">
+            <label class="res-lbl">Referencia (opcional)</label>
+            <input class="res-input" id="adm-referencia" placeholder="Ej: Oficio N° 123...">
+          </div>
+          <div class="res-field">
+            <label class="res-lbl">Palabra clave (para hoja)</label>
+            <input class="res-input" id="adm-clave" placeholder="Ej: MANTENIMIENTO, RRHH">
+          </div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-adm" onclick="generarDocAdmin()">🤖 Generar documento</button>
+          <button class="btn btn-ghost" onclick="document.getElementById('adm-form-card').style.display='none'">Cancelar</button>
+        </div>
+      </div>
+
+      <!-- RESULTADO DOC ADMINISTRATIVO -->
+      <div class="card" id="adm-result-card" style="display:none">
+        <div class="card-title"><div class="ct-ico adm">✅</div> Documento administrativo generado</div>
+        <div class="draft-wrap">
+          <div class="draft-head">
+            <span id="adm-draft-label">📄 Documento generado</span>
+            <div class="draft-actions">
+              <button class="draft-btn" onclick="copiarAdmin()">📋 Copiar</button>
+              <button class="draft-btn" onclick="descargarWordAdmin()">⬇ Word</button>
+            </div>
+          </div>
+          <textarea id="adm-draft" style="width:100%;min-height:350px;border:1px solid var(--line);border-top:none;border-radius:0 0 var(--radius) var(--radius);padding:18px 20px;font-family:var(--mono);font-size:12.5px;line-height:2;resize:vertical;outline:none;background:#FAFBFC"></textarea>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-adm" onclick="confirmarAdmin()">✅ Confirmar y registrar</button>
+          <button class="btn btn-ghost" onclick="document.getElementById('adm-result-card').style.display='none'">↩ Editar</button>
+        </div>
+        <div id="adm-status"></div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════
+         ④ RESIDENCIA
+    ════════════════════════════════════════ -->
+    <div class="panel" id="panel-residencia">
+      <div class="mod-banner res">
+        <div class="mod-banner-icon">🏗️</div>
+        <div>
+          <div class="mod-banner-title">Módulo Residencia</div>
+          <div class="mod-banner-sub">Requerimientos, conformidades, memorandums de obra, especificaciones técnicas con imágenes</div>
+        </div>
+      </div>
+      <div id="res-conn-warn" class="alert alert-warn" style="display:none">
+        ⚠️ <div><strong>Conexión incompleta.</strong> <span id="res-conn-warn-msg"></span> <a href="#" onclick="showPanel('config');switchCfgTab('webapp');return false" style="color:var(--warn);text-decoration:underline">Configurar →</a></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><div class="ct-ico res">🏗️</div> Tipo de documento de residencia</div>
+        <div class="res-doc-types" id="res-tipos">
+          <div class="res-doc-type" onclick="selResDoc('requerimiento')" id="rdt-requerimiento">
+            <div class="rdt-ico">📋</div>
+            <div class="rdt-name">Requerimiento</div>
+          </div>
+          <div class="res-doc-type" onclick="selResDoc('conformidad')" id="rdt-conformidad">
+            <div class="rdt-ico">✅</div>
+            <div class="rdt-name">Conformidad</div>
+          </div>
+          <div class="res-doc-type" onclick="selResDoc('memorandum_obra')" id="rdt-memorandum_obra">
+            <div class="rdt-ico">📝</div>
+            <div class="rdt-name">Memorándum Obra</div>
+          </div>
+          <div class="res-doc-type" onclick="selResDoc('especificacion')" id="rdt-especificacion">
+            <div class="rdt-ico">📐</div>
+            <div class="rdt-name">Espec. Técnicas</div>
+          </div>
+          <div class="res-doc-type" onclick="selResDoc('informe_obra')" id="rdt-informe_obra">
+            <div class="rdt-ico">📊</div>
+            <div class="rdt-name">Informe de Obra</div>
+          </div>
+          <div class="res-doc-type" onclick="selResDoc('cuaderno')" id="rdt-cuaderno">
+            <div class="rdt-ico">📓</div>
+            <div class="rdt-name">Cuaderno de Obra</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FORMULARIO RESIDENCIA -->
+      <div class="card" id="res-form-card" style="display:none">
+        <div class="card-title"><div class="ct-ico res" id="res-form-ico">📋</div> <span id="res-form-titulo">Requerimiento</span></div>
+
+        <div class="res-form">
+          <div class="res-field">
+            <label class="res-lbl">N° de Informe / Doc.</label>
+            <input class="res-input" id="res-num" placeholder="Ej: 001">
+          </div>
+          <div class="res-field">
+            <label class="res-lbl">Nombre de la Obra</label>
+            <input class="res-input" id="res-obra" placeholder="Nombre completo de la obra">
+          </div>
+          <div class="res-field">
+            <label class="res-lbl">Meta presupuestal</label>
+            <input class="res-input" id="res-meta" placeholder="Ej: 0014">
+          </div>
+          <div class="res-field">
+            <label class="res-lbl">Fecha</label>
+            <input class="res-input" type="date" id="res-fecha">
+          </div>
+          <div class="res-field full">
+            <label class="res-lbl">Para / Destinatario</label>
+            <input class="res-input" id="res-para" placeholder="Nombre y cargo">
+          </div>
+          <div class="res-field full">
+            <label class="res-lbl">Asunto</label>
+            <input class="res-input" id="res-asunto" placeholder="Asunto del documento">
+          </div>
+          <div class="res-field full" id="res-items-section">
+            <label class="res-lbl">Ítems / Materiales <span style="font-size:10px;opacity:.6;font-weight:400;text-transform:none">(uno por línea: Descripción | Cantidad | Unidad)</span></label>
+            <textarea class="res-textarea" id="res-items" placeholder="Pintura látex blanco | 5 | Galón&#10;Cemento tipo I | 20 | Bolsa&#10;Arena fina | 2 | m³"></textarea>
+          </div>
+          <div class="res-field full">
+            <label class="res-lbl">Descripción / Observaciones adicionales</label>
+            <textarea class="res-textarea" id="res-desc" style="min-height:80px" placeholder="Describe el motivo, antecedentes o detalles adicionales..."></textarea>
+          </div>
+        </div>
+
+        <!-- ZONA DE IMÁGENES (Especificaciones técnicas) -->
+        <div id="res-img-section" style="display:none;margin-bottom:16px">
+          <div style="font-size:13px;font-weight:700;color:var(--res);margin-bottom:8px;display:flex;align-items:center;gap:7px">🖼️ Imágenes / Fotos de obra</div>
+          <label for="res-img-input">
+            <div class="res-img-zone">
+              <div style="font-size:30px;margin-bottom:8px">📸</div>
+              <div style="font-size:13px;font-weight:600">Arrastra imágenes o haz clic para agregar</div>
+              <div style="font-size:11px;color:var(--ink3);opacity:.6;margin-top:4px">JPG, PNG, WEBP — múltiples archivos</div>
+            </div>
+          </label>
+          <input type="file" id="res-img-input" accept="image/*" multiple style="display:none">
+          <div class="res-img-preview" id="res-img-preview"></div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn btn-res" onclick="generarDocRes()">🤖 Generar documento</button>
+          <button class="btn btn-ghost" onclick="document.getElementById('res-form-card').style.display='none'">Cancelar</button>
+        </div>
+      </div>
+
+      <!-- RESULTADO RESIDENCIA -->
+      <div class="card" id="res-result-card" style="display:none">
+        <div class="card-title"><div class="ct-ico res">✅</div> Documento de residencia generado</div>
+
+        <!-- VALIDACIÓN AGENTE -->
+        <div class="agente-box" id="res-agente-box" style="display:none">
+          <div class="agente-title">🤖 Agente Validador — coherencia del documento</div>
+          <div class="agente-loading" id="res-agente-loading"><div class="agente-dot"></div> Validando...</div>
+          <div class="agente-result" id="res-agente-result" style="display:none"></div>
+        </div>
+
+        <div class="draft-wrap">
+          <div class="draft-head">
+            <span id="res-draft-label">📄 Documento generado</span>
+            <div class="draft-actions">
+              <button class="draft-btn" onclick="copiarRes()">📋 Copiar</button>
+              <button class="draft-btn" onclick="descargarWordRes()">⬇ Word</button>
+            </div>
+          </div>
+          <textarea id="res-draft" style="width:100%;min-height:380px;border:1px solid var(--line);border-top:none;border-radius:0 0 var(--radius) var(--radius);padding:18px 20px;font-family:var(--mono);font-size:12.5px;line-height:2;resize:vertical;outline:none;background:#FAFBFC"></textarea>
+        </div>
+
+        <!-- Chat correcciones residencia -->
+        <div class="chat-box">
+          <div class="chat-head">💬 Correcciones — dile qué cambiar</div>
+          <div class="chat-msgs" id="res-cmsgs">
+            <div class="msg msg-ai">Revisa el documento. Si algo está incorrecto dímelo aquí.</div>
+          </div>
+          <div class="chat-input">
+            <input type="text" id="res-cinput" placeholder="Ej: Agrega el ítem cemento blanco 3 bolsas...">
+            <button class="chat-send" onclick="chatRes()">➤</button>
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn btn-res" onclick="confirmarRes()">✅ Confirmar y registrar</button>
+          <button class="btn btn-ghost" onclick="document.getElementById('res-result-card').style.display='none'">↩ Editar</button>
+        </div>
+        <div id="res-status"></div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════
+         ⑤ CONFIGURACIÓN
+    ════════════════════════════════════════ -->
+    <div class="panel" id="panel-config">
+      <div class="page-header">
+        <div class="page-title">⚙️ Configuración</div>
+        <div class="page-sub">Conecta tu entidad, Drive y Google Sheet</div>
+      </div>
+
+      <div class="cfg-tabs">
+        <button class="cfg-tab active" id="ctab-municipio" onclick="switchCfgTab('municipio')">🏛️ Entidad</button>
+        <button class="cfg-tab" id="ctab-drive" onclick="switchCfgTab('drive')">📁 Drive</button>
+        <button class="cfg-tab" id="ctab-sheet" onclick="switchCfgTab('sheet')">📊 Sheet</button>
+        <button class="cfg-tab" id="ctab-webapp" onclick="switchCfgTab('webapp')">🔗 Web App</button>
+        <button class="cfg-tab" id="ctab-resumen" onclick="switchCfgTab('resumen')">📋 Resumen</button>
+      </div>
+
+      <!-- TAB: ENTIDAD -->
+      <div class="cfg-pane show" id="cpane-municipio">
+        <div class="card">
+          <div class="card-title"><div class="ct-ico">🏛️</div> Datos de la entidad y funcionarios</div>
+          <div class="alert alert-info">💡 <div>Configura estos datos <strong>una sola vez</strong>. Se usan en todos los documentos automáticamente.</div></div>
+          <div class="cfg-2col">
+            <div class="cfg-field full">
+              <label class="cfg-lbl">Nombre de la entidad / municipio</label>
+              <input class="cfg-input" id="pf-municipio" placeholder="Ej: MUNICIPALIDAD DISTRITAL DE BUENOS AIRES">
+            </div>
+            <div class="cfg-field full">
+              <label class="cfg-lbl">Año / Lema del año</label>
+              <input class="cfg-input" id="pf-lema" placeholder='Ej: "AÑO DEL BICENTENARIO DEL PERÚ"'>
+            </div>
+            <div class="cfg-field full">
+              <label class="cfg-lbl">Nombre del subgerente / responsable (quien firma)</label>
+              <input class="cfg-input" id="pf-subgerente" placeholder="Ej: Ing. Juan Pérez López">
+            </div>
+            <div class="cfg-field full">
+              <label class="cfg-lbl">Cargo del subgerente / responsable</label>
+              <input class="cfg-input" id="pf-cargo-sub" placeholder="Ej: Subgerente de Infraestructura, Desarrollo Urbano, Rural y Recursos">
+            </div>
+            <div class="cfg-field full">
+              <label class="cfg-lbl">Código del área (para N° de documento)</label>
+              <input class="cfg-input" id="pf-codigo" placeholder="Ej: SGIDURYR-GM/JPL">
+            </div>
+            <div class="cfg-field">
+              <label class="cfg-lbl">Gerente / Jefe inmediato superior</label>
+              <input class="cfg-input" id="pf-gerente" placeholder="Ej: Lic. María Torres Díaz">
+            </div>
+            <div class="cfg-field">
+              <label class="cfg-lbl">Cargo del gerente</label>
+              <input class="cfg-input" id="pf-cargo-ger" placeholder="Ej: Gerente Municipal">
+            </div>
+            <div class="cfg-field">
+              <label class="cfg-lbl">Lugar (ciudad/distrito)</label>
+              <input class="cfg-input" id="pf-lugar" placeholder="Ej: Buenos Aires">
+            </div>
+            <div class="cfg-field">
+              <label class="cfg-lbl">Región / Departamento</label>
+              <input class="cfg-input" id="pf-region" placeholder="Ej: San Martín">
+            </div>
+            <div class="cfg-field full">
+              <label class="cfg-lbl">Abreviatura del área (para remitido a en Sheet)</label>
+              <input class="cfg-input" id="pf-abrev-gerencia" placeholder="Ej: GM, SGIDURYR, GI">
+            </div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-primary" onclick="guardarPerfilCfg()">💾 Guardar datos de la entidad</button>
+          </div>
+          <div id="muni-status"></div>
+        </div>
+      </div>
+
+      <!-- TAB: DRIVE -->
+      <div class="cfg-pane" id="cpane-drive">
+        <div class="card">
+          <div class="card-title"><div class="ct-ico">📁</div> Carpetas de Google Drive</div>
+          <div class="alert alert-info">💡 <div>Vincula las carpetas de <strong>plantillas</strong> y <strong>documentos generados</strong>. El sistema copia tu plantilla y solo modifica los datos en corchetes.</div></div>
+
+          <div class="drive-card" id="dc-plantillas">
+            <div class="drive-card-head">
+              <div class="drive-icon">📋</div>
+              <div style="flex:1">
+                <div class="drive-name">Carpeta de Plantillas</div>
+                <div class="drive-sub">El sistema busca aquí las plantillas base para copiarlas y completarlas</div>
+              </div>
+              <div class="conn-badge" id="badge-plantillas">Sin conectar</div>
+            </div>
+            <div class="drive-input-row">
+              <input class="cfg-input" id="driveIdPlantillas" placeholder="ID de la carpeta de plantillas" oninput="onDriveIdChange('plantillas')">
+              <button class="btn-drive-open" id="btn-open-plantillas" onclick="abrirDrive('plantillas')" style="display:none">↗ Abrir</button>
+            </div>
+            <div class="drive-status" id="dstatus-plantillas"></div>
+          </div>
+
+          <div class="drive-card" id="dc-docs" style="margin-top:14px">
+            <div class="drive-card-head">
+              <div class="drive-icon">📤</div>
+              <div style="flex:1">
+                <div class="drive-name">Carpeta de Documentos Generados</div>
+                <div class="drive-sub">Aquí se guardarán los documentos Word generados y firmados</div>
+              </div>
+              <div class="conn-badge" id="badge-docs">Sin conectar</div>
+            </div>
+            <div class="drive-input-row">
+              <input class="cfg-input" id="driveIdDocs" placeholder="ID de la carpeta de destino" oninput="onDriveIdChange('docs')">
+              <button class="btn-drive-open" id="btn-open-docs" onclick="abrirDrive('docs')" style="display:none">↗ Abrir</button>
+            </div>
+            <div class="drive-status" id="dstatus-docs"></div>
+          </div>
+
+          <div class="cfg-help-box">
+            <div style="font-size:12px;font-weight:700;color:var(--ink3);margin-bottom:6px">📌 ¿Cómo obtengo el ID de una carpeta Drive?</div>
+            <div style="font-size:12px;color:var(--ink3);opacity:.8;line-height:1.7">
+              1. Abre Google Drive y entra a la carpeta<br>
+              2. En la URL: <code style="background:var(--surface2);padding:1px 5px;border-radius:4px;font-family:var(--mono);font-size:11px">drive.google.com/drive/folders/<strong>ESTE_ES_EL_ID</strong></code><br>
+              3. Copia solo esa parte
+            </div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-primary" onclick="guardarDriveIds()">💾 Guardar carpetas</button>
+            <button class="btn btn-ghost" onclick="verificarDrives()">🔍 Verificar acceso</button>
+          </div>
+          <div id="drive-status-global"></div>
+        </div>
+      </div>
+
+      <!-- TAB: SHEET -->
+      <div class="cfg-pane" id="cpane-sheet">
+        <div class="card">
+          <div class="card-title"><div class="ct-ico">📊</div> Google Sheet de registro</div>
+          <div class="alert alert-info">💡 <div>El sistema verifica si el N° de informe ya existe antes de registrar, y busca el correlativo anterior automáticamente.</div></div>
+
+          <div class="cfg-field" style="margin-bottom:14px">
+            <label class="cfg-lbl">ID del Google Sheet</label>
+            <div class="drive-input-row">
+              <input class="cfg-input" id="cfgSheet" placeholder="ID del Sheet (en la URL del documento)..." oninput="onSheetIdChange()">
+              <button class="btn-drive-open" id="btn-open-sheet" onclick="abrirSheet()" style="display:none">↗ Abrir</button>
+            </div>
+          </div>
+          <div class="cfg-field" style="margin-bottom:14px">
+            <label class="cfg-lbl">Nombre de la hoja (pestaña)</label>
+            <input class="cfg-input" id="cfgHoja" placeholder="Ej: INF. EMIT." style="max-width:250px">
+          </div>
+
+          <div class="sheet-structure-preview">
+            <div style="font-size:12px;font-weight:700;color:var(--primary);margin-bottom:8px">📋 Estructura de columnas en el Sheet</div>
+            <div class="sheet-cols-row">
+              <div class="sheet-col-chip">A<br><span>Nombre Remitente</span></div>
+              <div class="sheet-col-chip">B<br><span>N° Inf. Remitente</span></div>
+              <div class="sheet-col-chip">C<br><span>N° Inf. (correlativo)</span></div>
+              <div class="sheet-col-chip">D<br><span>Asunto</span></div>
+              <div class="sheet-col-chip">E<br><span>Folios</span></div>
+              <div class="sheet-col-chip">F<br><span>Fecha</span></div>
+              <div class="sheet-col-chip">G<br><span>Obra / Unidad</span></div>
+              <div class="sheet-col-chip">H<br><span>Remitido a</span></div>
+              <div class="sheet-col-chip">I<br><span>Observaciones</span></div>
+            </div>
+          </div>
+
+          <div class="btn-row">
+            <button class="btn btn-primary" onclick="guardarCfgSheet()">💾 Guardar Sheet</button>
+            <button class="btn btn-ghost" onclick="abrirSheet()">↗ Abrir Sheet</button>
+            <button class="btn btn-ghost" onclick="verificarSheet()">🔍 Verificar</button>
+          </div>
+          <div id="sheet-status"></div>
+        </div>
+      </div>
+
+      <!-- TAB: WEB APP -->
+      <div class="cfg-pane" id="cpane-webapp">
+        <div class="card">
+          <div class="card-title"><div class="ct-ico">🔗</div> Estado de conexiones y Web App</div>
+
+          <div class="conn-status-box">
+            <div class="conn-row">
+              <div class="conn-dot" id="cdot-drive"></div>
+              <div class="conn-label">Google Drive (plantillas + docs)</div>
+              <div class="conn-val" id="cval-drive">Sin configurar</div>
+            </div>
+            <div class="conn-row">
+              <div class="conn-dot" id="cdot-sheet"></div>
+              <div class="conn-label">Google Sheet (registro)</div>
+              <div class="conn-val" id="cval-sheet">Sin configurar</div>
+            </div>
+            <div class="conn-row">
+              <div class="conn-dot" id="cdot-wa"></div>
+              <div class="conn-label">Web App (Apps Script)</div>
+              <div class="conn-val" id="cval-wa">Sin configurar</div>
+            </div>
+          </div>
+
+          <div class="cfg-field" style="margin-bottom:14px">
+            <label class="cfg-lbl">URL de la Web App (Google Apps Script)</label>
+            <div class="drive-input-row">
+              <input class="cfg-input" id="cfgWA" placeholder="https://script.google.com/macros/s/.../exec" oninput="onWAChange()">
+              <button class="btn-drive-open" id="btn-test-wa" onclick="testWebApp()" style="display:none">🔍 Probar</button>
+            </div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-primary" onclick="guardarWA()">💾 Guardar Web App</button>
+          </div>
+          <div id="wa-status"></div>
+
+          <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--line)">
+            <button class="btn btn-danger" onclick="borrarTodaCfg()">🗑️ Borrar toda la configuración</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB: RESUMEN -->
+      <div class="cfg-pane" id="cpane-resumen">
+        <div class="card">
+          <div class="card-title"><div class="ct-ico">📋</div> Resumen de configuración</div>
+          <div id="cfg-resumen"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════
+         ⑥ GUÍA APPS SCRIPT
+    ════════════════════════════════════════ -->
+    <div class="panel" id="panel-guia">
+      <div class="page-header">
+        <div class="page-title">📖 Guía — Google Apps Script</div>
+        <div class="page-sub">Configura el Apps Script para conectar con tu Google Sheet y Drive</div>
+      </div>
+      <div class="card">
+        <div class="guide-step"><div class="gs-num">1</div><div class="gs-content"><div class="gs-title">Abre tu Google Sheet y entra al editor de scripts</div><div class="gs-desc">En el Sheet: <strong>Extensiones → Apps Script</strong>. Se abre el editor de código.</div></div></div>
+        <div class="guide-step"><div class="gs-num">2</div><div class="gs-content"><div class="gs-title">Pega este código completo</div><div class="gs-desc">Borra todo el contenido del editor y reemplázalo con:</div>
+<pre class="code-block">function doPost(e) {
+  try {
+    var d = JSON.parse(e.postData.contents);
+    var ss = SpreadsheetApp.openById(d.sheet_id);
+    var hoja = d.hoja || 'INF. EMIT.';
+    var sheet = ss.getSheetByName(hoja);
+    
+    // Crear hoja si no existe
+    if (!sheet) {
+      sheet = ss.insertSheet(hoja);
+      sheet.appendRow(['NOMBRE REMITENTE','N° INF. REMITENTE',
+        'N° INF.','ASUNTO','N° FOLIOS','FECHA',
+        'OBRA','REMITIDO A','OBSERVACIONES']);
+    }
+    
+    var lastRow = sheet.getLastRow();
+    var ultimoNum = 0;
+    
+    // Buscar el último número correlativo
+    if (lastRow > 1) {
+      var vals = sheet.getRange(2, 3, lastRow-1, 1).getValues();
+      vals.forEach(function(r) {
+        var n = parseInt(r[0]);
+        if (!isNaN(n) && n > ultimoNum) ultimoNum = n;
+      });
+    }
+    
+    // Verificar si el número ya existe
+    var numInf = parseInt(d.num_informe) || (ultimoNum + 1);
+    if (d.num_informe && d.num_informe != '' ) {
+      var yaExiste = false;
+      if (lastRow > 1) {
+        var existentes = sheet.getRange(2,3,lastRow-1,1).getValues();
+        existentes.forEach(function(r){ if(parseInt(r[0])==numInf) yaExiste=true; });
+      }
+      if (yaExiste) numInf = ultimoNum + 1;
+    }
+    
+    var fecha = Utilities.formatDate(new Date(),'America/Lima','dd/MM/yyyy');
+    
+    // Registrar — SIN observaciones (columna I vacía)
+    sheet.appendRow([
+      d.nombre_remitente || '',
+      d.num_inf_remitente || '',
+      numInf,
+      d.asunto || '',
+      d.num_folios || '2',
+      fecha,
+      d.nombre_obra || d.clave || '',
+      d.destinatario || 'GM',
+      '' // Observaciones vacías — el usuario las llena
+    ]);
+    
+    return ContentService
+      .createTextOutput(JSON.stringify({ok:true, numInf:numInf, siguiente: numInf+1}))
+      .setMimeType(ContentService.MimeType.JSON);
+      
+  } catch(err) {
+    return ContentService
+      .createTextOutput(JSON.stringify({ok:false, error:err.message}))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+function doGet(e) {
+  // Para consultar el último número
+  try {
+    var ss = SpreadsheetApp.openById(e.parameter.sheet_id);
+    var sheet = ss.getSheetByName(e.parameter.hoja || 'INF. EMIT.');
+    if (!sheet) return ContentService.createTextOutput(JSON.stringify({ultimoNum:0})).setMimeType(ContentService.MimeType.JSON);
+    var lastRow = sheet.getLastRow();
+    var ultimoNum = 0;
+    if (lastRow > 1) {
+      var vals = sheet.getRange(2,3,lastRow-1,1).getValues();
+      vals.forEach(function(r){ var n=parseInt(r[0]); if(!isNaN(n)&&n>ultimoNum) ultimoNum=n; });
+    }
+    return ContentService.createTextOutput(JSON.stringify({ultimoNum:ultimoNum, siguiente:ultimoNum+1})).setMimeType(ContentService.MimeType.JSON);
+  } catch(err) {
+    return ContentService.createTextOutput(JSON.stringify({ultimoNum:0,error:err.message})).setMimeType(ContentService.MimeType.JSON);
+  }
+}</pre>
+        </div></div>
+        <div class="guide-step"><div class="gs-num">3</div><div class="gs-content"><div class="gs-title">Implementar como aplicación web</div><div class="gs-desc">Clic en <strong>Implementar → Nueva implementación</strong>. Tipo: <strong>Aplicación web</strong>. Ejecutar como: <strong>Yo</strong>. Acceso: <strong>Cualquier usuario</strong>.</div></div></div>
+        <div class="guide-step"><div class="gs-num">4</div><div class="gs-content"><div class="gs-title">Copia la URL y pégala en Configuración → Web App</div><div class="gs-desc">La URL tiene formato: <code style="font-family:var(--mono);font-size:11px;background:var(--surface2);padding:2px 6px;border-radius:4px">https://script.google.com/macros/s/AKfy.../exec</code></div></div></div>
+        <div class="btn-row">
+          <button class="btn btn-ghost" onclick="showPanel('config');switchCfgTab('webapp')">← Volver a configuración</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════
+         ⑦ API GEMINI
+    ════════════════════════════════════════ -->
+    <div class="panel" id="panel-apiconf">
+      <div class="page-header">
+        <div class="page-title">🔑 API Gemini</div>
+        <div class="page-sub">Necesitas una API Key gratuita de Google para el procesamiento</div>
+      </div>
+      <div class="card">
+        <div class="card-title"><div class="ct-ico">🔑</div> API Key de Gemini</div>
+        <div class="alert alert-warn">
+          ⚠️ <div>Tu API Key se guarda <strong>solo en tu navegador</strong> (localStorage). Nunca se envía a ningún servidor externo salvo al de Google Gemini.</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:5px;margin-bottom:14px">
+          <label class="cfg-lbl">API Key</label>
+          <input type="password" class="cfg-input" id="apikey" placeholder="Pega tu API Key de Google AI Studio..." style="max-width:500px">
+        </div>
+        <div style="font-size:12px;color:var(--ink3);margin-bottom:14px">¿No tienes una? Es gratis — <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:var(--teal)">obtenerla en aistudio.google.com →</a></div>
+        <div id="api-status-msg" style="display:none" class="status-msg st-ok">✅ API Key activa y guardada</div>
+        <div class="btn-row">
+          <button class="btn btn-teal" onclick="guardarKey()">💾 Guardar API Key</button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ══════════════ MODAL: ENTIDAD ══════════════ -->
+<div class="modal-overlay" id="modal-perfil">
+  <div class="modal">
+    <div class="modal-title">🏛️ Configurar entidad y funcionarios</div>
+    <div class="modal-note">💡 Configura estos datos <strong>una sola vez</strong>. Se guardan en tu navegador y se usan en todos los documentos.</div>
+    <div class="modal-grid">
+      <div class="modal-field full"><label>Nombre de la entidad</label><input id="pm-municipio" placeholder="Ej: MUNICIPALIDAD DISTRITAL DE BUENOS AIRES"></div>
+      <div class="modal-field full"><label>Lema del año</label><input id="pm-lema" placeholder='Ej: "AÑO DEL BICENTENARIO"'></div>
+      <div class="modal-field full"><label>Subgerente / responsable (quien firma)</label><input id="pm-subgerente" placeholder="Ej: Ing. Juan Pérez López"></div>
+      <div class="modal-field full"><label>Cargo</label><input id="pm-cargo-sub" placeholder="Ej: Subgerente de Infraestructura..."></div>
+      <div class="modal-field full"><label>Código del área</label><input id="pm-codigo" placeholder="Ej: SGIDURYR-GM/JPL"></div>
+      <div class="modal-field"><label>Gerente superior</label><input id="pm-gerente" placeholder="Ej: Lic. María Torres"></div>
+      <div class="modal-field"><label>Cargo del gerente</label><input id="pm-cargo-ger" placeholder="Ej: Gerente Municipal"></div>
+      <div class="modal-field"><label>Lugar</label><input id="pm-lugar" placeholder="Ej: Buenos Aires"></div>
+      <div class="modal-field"><label>Región</label><input id="pm-region" placeholder="Ej: San Martín"></div>
+    </div>
+    <div class="modal-btns">
+      <button class="btn btn-ghost" onclick="cerrarPerfil()">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardarPerfil()">💾 Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- API KEY BAR FLOTANTE -->
+<div class="api-bar" id="apiBar" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:150;border-radius:0;border-top:1px solid var(--amber-m)">
+  <label>🔑 API Key Gemini:</label>
+  <input type="password" id="apikeybar" placeholder="Pega tu API Key...">
+  <button class="btn btn-teal" onclick="guardarKeyBar()" style="padding:7px 14px;font-size:13px">Guardar</button>
+  <a href="https://aistudio.google.com/app/apikey" target="_blank" style="font-size:12px;color:var(--teal)">Obtener gratis →</a>
+  <button class="btn btn-ghost" onclick="document.getElementById('apiBar').style.display='none'" style="padding:5px 10px;font-size:12px">✕</button>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     JAVASCRIPT PRINCIPAL
+══════════════════════════════════════════════════ -->
+<script>
+// ══════ ESTADO GLOBAL ══════
+let apiKey = localStorage.getItem('gkey') || '';
+let historial = JSON.parse(localStorage.getItem('hist') || '[]');
+let perfil = JSON.parse(localStorage.getItem('perfil') || 'null') || {};
+let cfgSheet = JSON.parse(localStorage.getItem('cfgSheet') || 'null') || {};
+let archivo = null, b64 = null, mime = null;
+let borrador = '', analisis = {}, chatHist = [], busy = false;
+let admDocTipo = 'memorandum';
+let resDocTipo = 'requerimiento';
+let resImagenes = [];
+let resBorrador = '', resHist = [], admHist = [];
+let resChatHist = [], resAgenteBusy = false;
+
+// ══════ INIT ══════
+window.onload = () => {
+  if (apiKey) {
+    const el = document.getElementById('apikey');
+    if(el) el.value = '••••••••••••••••';
+    document.getElementById('api-status-msg').style.display = 'flex';
+  } else {
+    document.getElementById('apiBar').style.display = 'flex';
+  }
+  if (perfil.municipio) {
+    document.getElementById('tb-muni-label').textContent = perfil.municipio;
+  } else {
+    document.getElementById('alert-perfil').style.display = 'flex';
+  }
+  if (cfgSheet.sheetId) { document.getElementById('cfgSheet').value = cfgSheet.sheetId; onSheetIdChange(); }
+  if (cfgSheet.hoja) document.getElementById('cfgHoja').value = cfgSheet.hoja;
+  if (cfgSheet.drivePlantillas) { document.getElementById('driveIdPlantillas').value = cfgSheet.drivePlantillas; onDriveIdChange('plantillas'); setBadge('plantillas','✓ Guardado','ok'); }
+  if (cfgSheet.driveDocs) { document.getElementById('driveIdDocs').value = cfgSheet.driveDocs; onDriveIdChange('docs'); setBadge('docs','✓ Guardado','ok'); }
+  if (cfgSheet.webapp) { document.getElementById('cfgWA').value = cfgSheet.webapp; onWAChange(); }
+
+  // Fecha por defecto en formularios
+  const hoy = new Date().toISOString().split('T')[0];
+  document.getElementById('adm-fecha').value = hoy;
+  document.getElementById('res-fecha').value = hoy;
+
+  refreshCfgBadge();
+  renderHist();
+  actualizarStatsAdm();
+  setStep(1); // Iniciar en paso 1 activo
+};
+
+// ══════ NAVEGACIÓN ══════
+function showPanel(name) {
+  if(name === 'sheet') { showPanel('config'); switchCfgTab('sheet'); return; }
+  const panels = ['nuevo','hist','admin','residencia','config','guia','apiconf'];
+  panels.forEach(p => {
+    const el = document.getElementById('panel-'+p);
+    if(el) el.classList.remove('show');
+    const nav = document.getElementById('nav-'+p);
+    if(nav) nav.classList.remove('active','active-teal','active-res','active-adm');
+  });
+  const target = document.getElementById('panel-'+name);
+  if(target) target.classList.add('show');
+  const nav = document.getElementById('nav-'+name);
+  if(nav) {
+    const cls = name==='admin'?'active-adm':name==='residencia'?'active-res':'active';
+    nav.classList.add(cls);
+  }
+  if(name==='config') refreshCfgResumen();
+  if(name==='nuevo') setStep(1);
+  if(name==='admin') checkConnWarning('adm');
+  if(name==='residencia') checkConnWarning('res');
+  window.scrollTo(0,0);
+}
+
+// ══════ AVISO DE CONEXIÓN ══════
+function checkConnWarning(prefix) {
+  const warnEl = document.getElementById(prefix+'-conn-warn');
+  const msgEl  = document.getElementById(prefix+'-conn-warn-msg');
+  if(!warnEl || !msgEl) return;
+  const problemas = [];
+  if(!apiKey) problemas.push('API Key de Gemini no configurada (sin ella no se pueden generar documentos)');
+  if(!cfgSheet.webapp) problemas.push('Web App no configurada (los documentos no se registrarán en el Sheet)');
+  else if(!cfgSheet.sheetId) problemas.push('Google Sheet no configurado (los registros no se guardarán)');
+  if(problemas.length) {
+    msgEl.textContent = problemas.join(' · ');
+    warnEl.style.display = 'flex';
+  } else {
+    warnEl.style.display = 'none';
+  }
+}
+
+// ══════ PERFIL MODAL ══════
+function abrirPerfil() { showPanel('config'); switchCfgTab('municipio'); }
+function cerrarPerfil() { document.getElementById('modal-perfil').classList.remove('open'); }
+
+function cargarCamposMunicipio() {
+  const mapa = {municipio:'municipio',lema:'lema',subgerente:'subgerente','cargo-sub':'cargo_sub',codigo:'codigo',gerente:'gerente','cargo-ger':'cargo_ger',lugar:'lugar',region:'region','abrev-gerencia':'abrev_gerencia'};
+  Object.entries(mapa).forEach(([id,key]) => {
+    const el = document.getElementById('pf-'+id);
+    if(el) el.value = perfil[key] || '';
+  });
+}
+
+function guardarPerfilCfg() {
+  const nuevo = {
+    municipio: val('pf-municipio'), lema: val('pf-lema'),
+    subgerente: val('pf-subgerente'), cargo_sub: val('pf-cargo-sub'),
+    codigo: val('pf-codigo'), gerente: val('pf-gerente'),
+    cargo_ger: val('pf-cargo-ger'), lugar: val('pf-lugar'),
+    region: val('pf-region'), abrev_gerencia: val('pf-abrev-gerencia'),
+  };
+  if (!nuevo.municipio) { mostrarMiniStatus('muni-status','⚠️ El nombre de la entidad es obligatorio','err'); return; }
+  perfil = nuevo;
+  localStorage.setItem('perfil', JSON.stringify(perfil));
+  document.getElementById('tb-muni-label').textContent = nuevo.municipio;
+  document.getElementById('alert-perfil').style.display = 'none';
+  mostrarMiniStatus('muni-status','✅ Datos guardados correctamente','ok');
+  refreshCfgBadge();
+}
+
+function guardarPerfil() {
+  const nuevo = {
+    municipio: val('pm-municipio'), lema: val('pm-lema'),
+    subgerente: val('pm-subgerente'), cargo_sub: val('pm-cargo-sub'),
+    codigo: val('pm-codigo'), gerente: val('pm-gerente'),
+    cargo_ger: val('pm-cargo-ger'), lugar: val('pm-lugar'), region: val('pm-region'),
+  };
+  if (!nuevo.municipio) { alert('El nombre de la entidad es obligatorio'); return; }
+  perfil = nuevo;
+  localStorage.setItem('perfil', JSON.stringify(perfil));
+  document.getElementById('tb-muni-label').textContent = nuevo.municipio;
+  document.getElementById('alert-perfil').style.display = 'none';
+  cerrarPerfil();
+}
+
+function val(id) {
+  const el = document.getElementById(id);
+  return el ? el.value.trim() : '';
+}
+
+// ══════ CONFIG TABS ══════
+function switchCfgTab(tab) {
+  ['municipio','drive','sheet','webapp','resumen'].forEach(t => {
+    document.getElementById('ctab-'+t)?.classList.remove('active');
+    document.getElementById('cpane-'+t)?.classList.remove('show');
+  });
+  document.getElementById('ctab-'+tab)?.classList.add('active');
+  document.getElementById('cpane-'+tab)?.classList.add('show');
+  if(tab==='webapp') refreshConnStatus();
+  if(tab==='municipio') cargarCamposMunicipio();
+  if(tab==='resumen') refreshCfgResumen();
+}
+
+// ══════ DRIVE ══════
+function onDriveIdChange(tipo) {
+  const v = document.getElementById('driveId'+cap(tipo)).value.trim();
+  const btn = document.getElementById('btn-open-'+tipo);
+  if(btn) btn.style.display = v.length > 10 ? 'flex' : 'none';
+}
+function cap(s){return s.charAt(0).toUpperCase()+s.slice(1)}
+function abrirDrive(tipo) {
+  const id = document.getElementById('driveId'+cap(tipo)).value.trim();
+  if(!id) return;
+  window.open(`https://drive.google.com/drive/folders/${id}`, '_blank');
+}
+function guardarDriveIds() {
+  const idP = val('driveIdPlantillas'), idD = val('driveIdDocs');
+  cfgSheet.drivePlantillas = idP; cfgSheet.driveDocs = idD;
+  localStorage.setItem('cfgSheet', JSON.stringify(cfgSheet));
+  setBadge('plantillas', idP?'✓ Guardado':'Sin conectar', idP?'ok':'');
+  setBadge('docs', idD?'✓ Guardado':'Sin conectar', idD?'ok':'');
+  mostrarMiniStatus('drive-status-global','✅ Carpetas Drive guardadas','ok');
+  refreshCfgBadge();
+  if(idP) actualizarPlantillaBadge(idP);
+}
+function setBadge(tipo, txt, cls) {
+  const el = document.getElementById('badge-'+tipo);
+  if(!el) return;
+  el.textContent = txt;
+  el.className = 'conn-badge' + (cls==='ok'?' ok':'');
+}
+function verificarDrives() {
+  const idP = val('driveIdPlantillas'), idD = val('driveIdDocs');
+  if(!idP && !idD) { mostrarMiniStatus('drive-status-global','⚠️ Sin IDs configurados','warn'); return; }
+  mostrarMiniStatus('drive-status-global','⏳ Para verificar, usa el botón "↗ Abrir" de cada carpeta y confirma que tienes acceso en Drive.','info');
+}
+function actualizarPlantillaBadge(driveId) {
+  document.getElementById('plantilla-label').textContent = 'Drive ID: ...'+driveId.slice(-10)+' conectado';
+}
+
+// ══════ SHEET ══════
+function onSheetIdChange() {
+  const v = val('cfgSheet');
+  const btn = document.getElementById('btn-open-sheet');
+  if(btn) btn.style.display = v.length > 10 ? 'flex' : 'none';
+}
+function abrirSheet() {
+  const id = val('cfgSheet');
+  if(!id) return;
+  window.open(`https://docs.google.com/spreadsheets/d/${id}/edit`, '_blank');
+}
+function guardarCfgSheet() {
+  const id = val('cfgSheet'), hoja = val('cfgHoja') || 'INF. EMIT.';
+  cfgSheet.sheetId = id; cfgSheet.hoja = hoja;
+  localStorage.setItem('cfgSheet', JSON.stringify(cfgSheet));
+  mostrarMiniStatus('sheet-status','✅ Sheet guardado. Hoja: "'+hoja+'"','ok');
+  onSheetIdChange(); refreshCfgBadge(); refreshConnStatus();
+  // Intentar obtener el siguiente número correlativo
+  if(id && cfgSheet.webapp) consultarUltimoNum();
+}
+function verificarSheet() {
+  const id = val('cfgSheet');
+  if(!id) { mostrarMiniStatus('sheet-status','⚠️ Sin ID configurado','warn'); return; }
+  window.open(`https://docs.google.com/spreadsheets/d/${id}/edit`, '_blank');
+  mostrarMiniStatus('sheet-status','⏳ Sheet abierto en nueva pestaña. Verifica que tengas acceso.','info');
+}
+
+// ══════ WEB APP ══════
+function onWAChange() {
+  const v = val('cfgWA');
+  const btn = document.getElementById('btn-test-wa');
+  if(btn) btn.style.display = v.startsWith('https://') ? 'flex' : 'none';
+}
+async function testWebApp() {
+  const url = val('cfgWA');
+  if(!url) return;
+  mostrarMiniStatus('wa-status','⏳ Probando conexión...','info');
+  try {
+    // Enviamos petición GET con accion=ping — si responde con JSON es que está activa
+    const res = await fetch(url + '?accion=ping', {method:'GET', mode:'cors'});
+    const data = await res.json().catch(()=>null);
+    if(res.ok || data) {
+      mostrarMiniStatus('wa-status','✅ Web App respondió correctamente. Conexión funcional.','ok');
+      document.getElementById('cdot-wa').className='conn-dot ok';
+      document.getElementById('cval-wa').textContent='Conectado ✓';
+    } else {
+      throw new Error('Respuesta inválida');
+    }
+  } catch(e) {
+    // Si el error es CORS, la Web App existe pero no permite acceso directo (normal en Apps Script con no-cors)
+    // Intentar con no-cors como fallback para saber al menos si la URL responde
+    try {
+      await fetch(url, {method:'POST', mode:'no-cors', headers:{'Content-Type':'application/json'}, body:JSON.stringify({_test:true})});
+      mostrarMiniStatus('wa-status','⚠️ Web App alcanzada pero no se puede verificar la respuesta (CORS). Si el registro funciona al confirmar, está bien.','info');
+      document.getElementById('cdot-wa').className='conn-dot warn';
+      document.getElementById('cval-wa').textContent='Alcanzada (sin verificar)';
+    } catch(e2) {
+      mostrarMiniStatus('wa-status','❌ No se pudo conectar. Verifica que la URL sea correcta y esté publicada para "Cualquier usuario".','err');
+      document.getElementById('cdot-wa').className='conn-dot err';
+      document.getElementById('cval-wa').textContent='Sin conexión';
+    }
+  }
+}
+function guardarWA() {
+  const url = val('cfgWA');
+  cfgSheet.webapp = url;
+  localStorage.setItem('cfgSheet', JSON.stringify(cfgSheet));
+  mostrarMiniStatus('wa-status','✅ Web App guardada','ok');
+  refreshConnStatus(); refreshCfgBadge();
+}
+
+// ══════ HELPERS CONFIG ══════
+function mostrarMiniStatus(id, msg, tipo) {
+  const el = document.getElementById(id);
+  if(!el) return;
+  const cls = tipo==='ok'?'st-ok':tipo==='err'?'st-err':'st-info';
+  el.innerHTML = `<div class="status-msg ${cls}" style="margin-top:10px;font-size:12px">${msg}</div>`;
+  setTimeout(()=>{ if(el) el.innerHTML=''; }, 7000);
+}
+function refreshConnStatus() {
+  const dp = cfgSheet.drivePlantillas||'', dd = cfgSheet.driveDocs||'';
+  document.getElementById('cdot-drive').className = 'conn-dot'+(dp||dd?' ok':'');
+  document.getElementById('cval-drive').textContent = dp||dd ? 'Configurado' : 'Sin configurar';
+  const sh = cfgSheet.sheetId||'';
+  document.getElementById('cdot-sheet').className = 'conn-dot'+(sh?' ok':'');
+  document.getElementById('cval-sheet').textContent = sh ? 'ID: ...'+sh.slice(-10)+' · '+(cfgSheet.hoja||'INF. EMIT.') : 'Sin configurar';
+  const wa = cfgSheet.webapp||'';
+  document.getElementById('cdot-wa').className = 'conn-dot'+(wa?' warn':'');
+  document.getElementById('cval-wa').textContent = wa ? 'Configurado (sin verificar)' : 'Sin configurar';
+}
+function refreshCfgBadge() {
+  const badge = document.getElementById('cfg-badge');
+  if(!badge) return;
+  badge.style.display = (!perfil.municipio||!cfgSheet.sheetId||!cfgSheet.webapp) ? 'inline' : 'none';
+}
+function refreshCfgResumen() {
+  const el = document.getElementById('cfg-resumen');
+  if(!el) return;
+  const items = [
+    {ico:'🏛️',label:'Entidad',val:perfil.municipio||null},
+    {ico:'👤',label:'Subgerente/Responsable',val:perfil.subgerente||null},
+    {ico:'📁',label:'Drive Plantillas',val:cfgSheet.drivePlantillas?'...'+cfgSheet.drivePlantillas.slice(-12):null},
+    {ico:'📤',label:'Drive Docs',val:cfgSheet.driveDocs?'...'+cfgSheet.driveDocs.slice(-12):null},
+    {ico:'📊',label:'Google Sheet',val:cfgSheet.sheetId?'ID: ...'+cfgSheet.sheetId.slice(-10)+' · '+(cfgSheet.hoja||'INF. EMIT.'):null},
+    {ico:'🔗',label:'Web App',val:cfgSheet.webapp?cfgSheet.webapp.slice(0,55)+'...':null},
+    {ico:'🔑',label:'API Gemini',val:apiKey?'••••••••'+apiKey.slice(-4):null},
+  ];
+  el.innerHTML = items.map(i=>`
+    <div class="cfg-resumen-item">
+      <div class="cri-ico">${i.ico}</div>
+      <div style="flex:1"><div class="cri-label">${i.label}</div>
+      ${i.val?`<div class="cri-val">${i.val}</div>`:`<div class="cri-none">No configurado</div>`}</div>
+      ${i.val?'<div style="font-size:16px">✅</div>':'<div style="font-size:16px;opacity:.4">○</div>'}
+    </div>`).join('');
+  refreshConnStatus();
+}
+function borrarTodaCfg() {
+  if(!confirm('¿Borrar toda la configuración? Esta acción no se puede deshacer.')) return;
+  localStorage.clear(); apiKey=''; perfil={}; cfgSheet={}; historial=[];
+  alert('✅ Configuración borrada.'); location.reload();
+}
+function guardarKey() {
+  const v = val('apikey');
+  if(!v||v.startsWith('•')) { alert('Pega tu API Key primero'); return; }
+  apiKey=v; localStorage.setItem('gkey',v);
+  document.getElementById('apikey').value='••••••••••••••••';
+  document.getElementById('api-status-msg').style.display='flex';
+  document.getElementById('apiBar').style.display='none';
+  alert('✅ API Key guardada');
+}
+function guardarKeyBar() {
+  const v = val('apikeybar');
+  if(!v) return;
+  apiKey=v; localStorage.setItem('gkey',v);
+  document.getElementById('apikeybar').value='';
+  document.getElementById('apiBar').style.display='none';
+  const el = document.getElementById('apikey');
+  if(el) el.value='••••••••••••••••';
+  document.getElementById('api-status-msg').style.display='flex';
+}
+
+// ══════ CONSULTAR ÚLTIMO NÚMERO CORRELATIVO ══════
+async function consultarUltimoNum() {
+  if(!cfgSheet.webapp || !cfgSheet.sheetId) return;
+  try {
+    const url = cfgSheet.webapp + '?sheet_id='+cfgSheet.sheetId+'&hoja='+(cfgSheet.hoja||'INF. EMIT.');
+    const res = await fetch(url, {mode:'no-cors'});
+    // no-cors no permite leer la respuesta, pero al menos no da error
+  } catch(e) {}
+}
+
+// ══════ ARCHIVO ══════
+document.getElementById('fileinput').addEventListener('change', e => { if(e.target.files[0]) cargarArchivo(e.target.files[0]); });
+const uzone = document.getElementById('uzone');
+['dragover','dragleave','drop'].forEach(ev => uzone.addEventListener(ev, e => {
+  e.preventDefault();
+  if(ev==='dragover') uzone.classList.add('drag');
+  else if(ev==='dragleave') uzone.classList.remove('drag');
+  else { uzone.classList.remove('drag'); if(e.dataTransfer.files[0]) cargarArchivo(e.dataTransfer.files[0]); }
+}));
+function cargarArchivo(f) {
+  archivo=f;
+  const ext=f.name.split('.').pop().toLowerCase();
+  const isImg=['jpg','jpeg','png','webp','gif'].includes(ext);
+  document.getElementById('fname').textContent=f.name;
+  document.getElementById('fsize').textContent=(f.size/1024).toFixed(1)+' KB';
+  document.getElementById('ficon').textContent=isImg?'🖼️':ext==='pdf'?'📄':'📝';
+  document.getElementById('fprev').style.display='flex';
+  document.getElementById('btnproc').disabled=false;
+  mime=isImg?f.type:(ext==='pdf'?'application/pdf':null);
+  if(ext==='docx'){
+    // Gemini no puede procesar DOCX binario directamente; avisar al usuario
+    const fpSize=document.getElementById('fsize');
+    if(fpSize) fpSize.textContent+=' — ⚠️ DOCX: se enviará solo el nombre. Para mejor extracción, exporta como PDF.';
+  }
+  if(mime) {
+    const r=new FileReader();
+    r.onload=e=>{b64=e.target.result.split(',')[1];if(isImg){document.getElementById('imgprev').src=e.target.result;document.getElementById('imgprev').style.display='block';}};
+    r.readAsDataURL(f);
+  }
+}
+function limpiarArchivo() {
+  archivo=b64=mime=null;
+  document.getElementById('fileinput').value='';
+  document.getElementById('fprev').style.display='none';
+  document.getElementById('imgprev').style.display='none';
+  document.getElementById('btnproc').disabled=true;
+}
+
+// ══════ STEPS ══════
+function setStep(n) {
+  for(let i=1;i<=5;i++){
+    const s=document.getElementById('st'+i);
+    if(!s) continue;
+    s.classList.remove('active','done');
+    if(i<n) s.classList.add('done');
+    else if(i===n) s.classList.add('active');
+    const c=document.getElementById('sc'+i);
+    if(c){c.classList.remove('done');if(i<n)c.classList.add('done');}
+  }
+  ['p1','p2','p3','p4'].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.remove('show');});
+  const m={1:'p1',2:'p2',3:'p3',4:'p4',5:'p4'};
+  if(m[n]){const el=document.getElementById(m[n]);if(el)el.classList.add('show');}
+}
+
+// ══════ PLANTILLAS BASE ══════
+const PLANTILLAS = {
+  oc:{nombre:'Conformidad O/C',icono:'📦',clase:'tb-oc',pillClase:'pill-oc'},
+  os:{nombre:'Conformidad O/S',icono:'🔧',clase:'tb-os',pillClase:'pill-os'},
+  der:{nombre:'Derivación / Remisión',icono:'📨',clase:'tb-der',pillClase:'pill-der'},
+  otro:{nombre:'Otro documento',icono:'📋',clase:'tb-otro',pillClase:'pill-oc'}
+};
+
+function construirInforme(tipo, d) {
+  const p=perfil;
+  const hoy=new Date();
+  const fechaTexto=hoy.toLocaleDateString('es-PE',{day:'2-digit',month:'long',year:'numeric'});
+  const anio=hoy.getFullYear();
+  const numInf=document.getElementById('numInforme')?.value||'___';
+  const municipio=p.municipio||'[NOMBRE DE LA ENTIDAD]';
+  const lema=p.lema||'"[LEMA DEL AÑO]"';
+  const subgerente=p.subgerente||'[Nombre del subgerente]';
+  const cargoSub=p.cargo_sub||'[Cargo del subgerente]';
+  const codigo=p.codigo||'[CODIGO-AREA]';
+  const gerente=p.gerente||d.destinatario||'[Gerente]';
+  const lugar=p.lugar||'[Lugar]';
+
+  if(tipo==='oc') return `${municipio}
+${lema}
+${cargoSub.toUpperCase()}
+
+INFORME N° ${numInf}-${anio}-${codigo}
+
+A      : ${gerente}
+         ${p.cargo_ger||'Gerente Municipal'}
+DE     : ${subgerente}
+         ${cargoSub}
+ASUNTO : Remito conformidad de O/C N° ${d.num_orden||'___'}
+REFERENCIA: Informe N° ${d.num_inf_residente||'___'}
+
+${lugar}, ${fechaTexto}
+
+Por medio del presente me es grato dirigirme a usted, para saludarlo cordialmente y a su vez remitirle la CONFORMIDAD DE O/C N° ${d.num_orden||'___'}, SIAF ${d.num_siaf||'___'} — ${d.descripcion||'___'}, correspondiente a la obra/servicio: "${d.nombre_obra||'___'}".
+
+Solicitado por: ${d.nombre_remitente||'Residente de Obra'}, Meta ${d.meta||'___'}.
+
+PROVEEDOR            | RUC          | N° O/C               | SIAF       | META
+${(d.proveedor||'___').padEnd(20)} | ${(d.ruc||'___').padEnd(12)} | ${(d.num_orden||'___').padEnd(20)} | ${(d.num_siaf||'___').padEnd(10)} | ${d.meta||'___'}
+
+El Residente de Obra, mediante el informe de referencia, da fe de la recepción conforme de los bienes descritos, adjuntando la documentación sustentatoria correspondiente, por lo que se remite la presente conformidad para los fines pertinentes.
+
+Monto total: ${d.monto_num||'___'} (${d.monto_letras||'___'})
+
+Sin otro particular, quedo a su disposición.
+
+Adjunto:
+- Informe N° ${d.num_inf_residente||'___'}
+- Orden de Compra N° ${d.num_orden||'___'}
+- Pedido de Comprobante de Salida (PECOSA)${d.num_pecosa?' N° '+d.num_pecosa:''}
+- Guía de Remisión Electrónica${d.num_guia?' N° '+d.num_guia:''}
+- Factura Electrónica
+
+                                    Atentamente,
+
+
+${subgerente}                       ${d.nombre_remitente||'Residente de Obra'}
+${cargoSub}`;
+
+  if(tipo==='os') return `${municipio}
+${lema}
+${cargoSub.toUpperCase()}
+
+INFORME N° ${numInf}-${anio}-${codigo}
+
+A      : ${gerente}
+         ${p.cargo_ger||'Gerente Municipal'}
+DE     : ${subgerente}
+         ${cargoSub}
+ASUNTO : Remito conformidad de O/S N° ${d.num_orden||'___'}
+REFERENCIA: Informe N° ${d.num_inf_residente||'___'}
+
+${lugar}, ${fechaTexto}
+
+Por medio del presente me es grato dirigirme a usted, para saludarlo cordialmente y a su vez remitirle la CONFORMIDAD DE O/S N° ${d.num_orden||'___'}, SIAF ${d.num_siaf||'___'} — ${d.descripcion||'___'}, correspondiente a la obra/proyecto: "${d.nombre_obra||'___'}".
+
+Solicitado por: ${d.nombre_remitente||'Responsable'}, Meta ${d.meta||'___'}.
+
+PROVEEDOR            | RUC          | N° O/S               | SIAF       | META
+${(d.proveedor||'___').padEnd(20)} | ${(d.ruc||'___').padEnd(12)} | ${(d.num_orden||'___').padEnd(20)} | ${(d.num_siaf||'___').padEnd(10)} | ${d.meta||'___'}
+
+El responsable, mediante el informe de referencia, da conformidad de la prestación del servicio descrito, adjuntando la documentación sustentatoria correspondiente.
+
+Monto total: ${d.monto_num||'___'} (${d.monto_letras||'___'})
+
+Sin otro particular, quedo a su disposición.
+
+Adjunto:
+- Informe N° ${d.num_inf_residente||'___'}
+- Orden de Servicio N° ${d.num_orden||'___'}
+- Comprobante de Pago
+
+                                    Atentamente,
+
+
+${subgerente}                       ${d.nombre_remitente||'Responsable'}
+${cargoSub}`;
+
+  if(tipo==='der') return `${municipio}
+${lema}
+${cargoSub.toUpperCase()}
+
+INFORME N° ${numInf}-${anio}-${codigo}
+
+A      : ${gerente}
+         ${p.cargo_ger||'Gerente Municipal'}
+DE     : ${subgerente}
+         ${cargoSub}
+ASUNTO : ${d.descripcion||'Derivación de expediente'}
+REFERENCIA: ${d.num_inf_residente?'Informe N° '+d.num_inf_residente:'---'}
+
+${lugar}, ${fechaTexto}
+
+Por medio del presente me es grato dirigirme a usted, para saludarlo cordialmente y a su vez remitirle para su conocimiento y fines pertinentes ${d.descripcion||'el documento referenciado'} correspondiente a: "${d.nombre_obra||'___'}".
+
+Sin otro particular, quedo a su disposición.
+
+Adjunto:
+- ${d.num_inf_residente?'Informe N° '+d.num_inf_residente:'Documentos adjuntos'}
+
+                                    Atentamente,
+
+
+${subgerente}
+${cargoSub}`;
+
+  return `${municipio}
+${lema}
+${cargoSub.toUpperCase()}
+
+INFORME N° ${numInf}-${anio}-${codigo}
+
+A      : ${gerente}
+DE     : ${subgerente}
+ASUNTO : ${d.descripcion||'___'}
+
+${lugar}, ${fechaTexto}
+
+[Contenido del informe]
+
+                                    Atentamente,
+
+
+${subgerente}
+${cargoSub}`;
+}
+
+function actualizarNumInf() {
+  if(!analisis.datos) return;
+  borrador=construirInforme(analisis.tipo||'oc',analisis.datos||{});
+  document.getElementById('draft').value=borrador;
+}
+
+// ══════ PROCESAR CON GEMINI ══════
+async function procesar() {
+  if(!apiKey) { alert('Primero configura tu API Key de Gemini'); showPanel('apiconf'); return; }
+  if(!archivo) return;
+  setStep(2); animarPasos();
+
+  const prompt = `Eres un experto en documentos oficiales peruanos de gestión municipal y obras públicas.
+Analiza el siguiente expediente y extrae todos los datos posibles.
+
+PASO 1 — Tipo de documento (solo una opción):
+- "oc" = Conformidad de ORDEN DE COMPRA (bienes, materiales)
+- "os" = Conformidad de ORDEN DE SERVICIO (servicios)
+- "der" = Derivación o remisión de documentos
+- "otro" = Cualquier otro tipo
+
+PASO 2 — Extrae exactamente estos campos:
+num_orden, num_siaf, num_inf_residente, nombre_remitente (SOLO del documento, no inventes),
+destinatario, proveedor, ruc, monto_num (formato "S/ X,XXX.XX"), monto_letras,
+descripcion, num_guia, num_pecosa, fecha_orden, meta, nombre_obra, observaciones_tecnicas (solo inconsistencias técnicas reales).
+
+PASO 3 — Validación de coincidencias entre documentos:
+ruc_coincide, nombre_coincide, monto_coincide, orden_referenciada, nombre_obra_coincide (true/false)
+
+Responde SOLO con JSON (sin markdown):
+{"tipo":"oc","datos":{"num_orden":"","num_siaf":"","num_inf_residente":"","nombre_remitente":"","destinatario":"","proveedor":"","ruc":"","monto_num":"","monto_letras":"","descripcion":"","num_guia":"","num_pecosa":"","fecha_orden":"","meta":"","nombre_obra":"","observaciones_tecnicas":[]},"validacion":{"ruc_coincide":true,"nombre_coincide":true,"monto_coincide":true,"orden_referenciada":true,"nombre_obra_coincide":true}}`;
+
+  const parts=[{text:prompt}];
+  if(b64&&mime) parts.push({inline_data:{mime_type:mime,data:b64}});
+
+  try {
+    const res=await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+      {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts}]})}
+    );
+    const data=await res.json();
+    if(data.error) throw new Error(data.error.message);
+    let txt=data.candidates?.[0]?.content?.parts?.[0]?.text||'';
+    txt=txt.replace(/```json/gi,'').replace(/```/g,'').trim();
+    let parsed;
+    try{parsed=JSON.parse(txt);}catch(e){throw new Error('Respuesta no válida. Intenta de nuevo.');}
+    analisis=parsed; chatHist=[]; borrador=construirInforme(parsed.tipo||'oc',parsed.datos||{});
+    // Sugerir número correlativo
+    sugerirNumeroCorrelativo();
+    setTimeout(()=>mostrarRevision(),400);
+    // Ejecutar agente validador
+    setTimeout(()=>ejecutarAgenteValidador(),800);
+  } catch(err) {
+    setStep(1); alert('❌ Error:\n'+err.message);
+  }
+}
+
+function animarPasos() {
+  const ids=['ps2','ps3','ps4','ps5']; let i=0;
+  document.getElementById('ps1').classList.add('done');
+  function next(){
+    if(i>0){const p=document.getElementById(ids[i-1]);if(p){p.classList.remove('active');p.classList.add('done');}}
+    if(i<ids.length){const p=document.getElementById(ids[i]);if(p)p.classList.add('active');i++;setTimeout(next,700+Math.random()*350);}
+  }
+  setTimeout(next,200);
+}
+
+// ══════ SUGERIR NÚMERO CORRELATIVO ══════
+function sugerirNumeroCorrelativo() {
+  // Buscar en historial local el último número
+  if(historial.length > 0) {
+    const nums = historial.map(h=>parseInt(h.numInf)).filter(n=>!isNaN(n));
+    if(nums.length > 0) {
+      const siguiente = Math.max(...nums) + 1;
+      document.getElementById('numInforme').value = String(siguiente).padStart(3,'0');
+      document.getElementById('num-auto-badge').style.display = 'inline-flex';
+    }
+  }
+}
+
+// ══════ AGENTE VALIDADOR ══════
+async function ejecutarAgenteValidador() {
+  if(!apiKey) return;
+  const box = document.getElementById('agente-box');
+  const loading = document.getElementById('agente-loading');
+  const result = document.getElementById('agente-result');
+  if(!box) return;
+  box.style.display='block'; loading.style.display='flex'; result.style.display='none';
+
+  const draft = document.getElementById('draft').value;
+  const d = analisis.datos || {};
+
+  const prompt = `Eres un agente validador de documentos oficiales peruanos municipales. Analiza el siguiente informe y sus datos extraídos, luego determina:
+
+1. ¿El informe tiene coherencia interna? (asunto, datos, montos, nombres coinciden)
+2. ¿Hay datos críticos faltantes o inconsistentes?
+3. ¿El tipo de documento es correcto (O/C vs O/S)?
+4. ¿El formato cumple con la estructura oficial peruana?
+
+Informe generado:
+${draft.slice(0,1000)}
+
+Datos extraídos:
+${JSON.stringify(d)}
+
+Responde en formato JSON:
+{"es_coherente": true/false, "puntaje": 0-100, "observaciones": ["obs1","obs2"], "aprobado": true/false, "sugerencias": ["sug1"]}`;
+
+  try {
+    const res=await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+      {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt}]}]})}
+    );
+    const data=await res.json();
+    let txt=data.candidates?.[0]?.content?.parts?.[0]?.text||'{}';
+    txt=txt.replace(/```json/gi,'').replace(/```/g,'').trim();
+    const r=JSON.parse(txt);
+    loading.style.display='none'; result.style.display='block';
+    const color=r.aprobado?'#065F46':r.puntaje>60?'#78350F':'#991B1B';
+    const icono=r.aprobado?'✅':r.puntaje>60?'⚠️':'❌';
+    let html=`<div style="font-weight:700;color:${color};margin-bottom:8px">${icono} Puntaje de coherencia: ${r.puntaje}/100 — ${r.aprobado?'Aprobado':'Requiere revisión'}</div>`;
+    if(r.observaciones?.length) html+=`<div style="margin-bottom:6px">`+r.observaciones.map(o=>`<span class="agente-badge ${r.aprobado?'ab-ok':'ab-warn'}">⚠️ ${o}</span>`).join('')+`</div>`;
+    if(r.sugerencias?.length) html+=`<div>`+r.sugerencias.map(s=>`<span class="agente-badge ab-ok">💡 ${s}</span>`).join('')+`</div>`;
+    result.innerHTML=html;
+  } catch(e) {
+    loading.style.display='none'; result.style.display='block';
+    result.innerHTML='<span style="color:var(--ink3);font-size:12px">No se pudo validar automáticamente.</span>';
+  }
+}
+
+// ══════ MOSTRAR REVISIÓN ══════
+function mostrarRevision() {
+  const d=analisis.datos||{}; const val=analisis.validacion||{}; const obs=d.observaciones_tecnicas||[];
+  const tipo=analisis.tipo||'oc'; const tmpl=PLANTILLAS[tipo]||PLANTILLAS.oc;
+  document.getElementById('tipobadge').innerHTML=`<div class="tipo-badge ${tmpl.clase}">${tmpl.icono} ${tmpl.nombre} — detectado automáticamente</div>`;
+
+  const camposVal={ruc_coincide:'RUC igual en todos los docs',nombre_coincide:'Nombre proveedor coincide',monto_coincide:'Monto coincide',orden_referenciada:'N° Orden referenciado',nombre_obra_coincide:'Nombre de obra coincide'};
+  const todosOK=Object.values(val).every(v=>v===true);
+  const hayErr=Object.values(val).some(v=>v===false);
+  const vClass=todosOK?'val-ok':hayErr?'val-err':'val-warn';
+  const vTitle=todosOK?'✅ Validación OK — todos los datos coinciden':hayErr?'❌ Se encontraron inconsistencias — revisar antes de confirmar':'⚠️ Revisar datos del expediente';
+  let html=`<div class="val-box ${vClass}"><div class="val-title">${vTitle}</div><div class="val-items">`;
+  html+=Object.entries(val).map(([k,v])=>`<span class="val-item">${v?'✅':'❌'} ${camposVal[k]||k}</span>`).join('');
+  if(obs.length) html+=obs.map(o=>`<span class="val-item" style="background:#fef3c7">⚠️ ${o}</span>`).join('');
+  html+='</div></div>';
+  document.getElementById('vbox').innerHTML=html;
+
+  const campos=[['num_orden','N° Orden'],['num_siaf','N° SIAF'],['proveedor','Proveedor'],['ruc','RUC'],['monto_num','Monto'],['monto_letras','Monto letras'],['descripcion','Descripción'],['num_guia','Guía'],['num_pecosa','PECOSA'],['meta','Meta'],['nombre_obra','Obra/Proyecto'],['num_inf_residente','Inf. Residente'],['nombre_remitente','Residente/Responsable'],['fecha_orden','Fecha Orden']];
+  document.getElementById('dgrid').innerHTML=campos.filter(([k])=>d[k]).map(([k,l])=>`<div class="data-item"><div class="di-label">${l}</div><div class="di-val">${d[k]}</div></div>`).join('');
+
+  const fecha=new Date().toLocaleDateString('es-PE',{day:'2-digit',month:'2-digit',year:'numeric'});
+  const asunto=tipo==='oc'?`CONFORMIDAD DE O/C N° ${d.num_orden||''} - ${d.descripcion||''}`:tipo==='os'?`CONFORMIDAD DE O/S N° ${d.num_orden||''} - ${d.descripcion||''}`:d.descripcion||'';
+  // Palabra clave obra: nombre obra abreviado o unidad
+  const claveObra = d.nombre_obra ? d.nombre_obra.split(' ').slice(0,3).join(' ').toUpperCase() : (perfil.codigo||'');
+  const colsSheet=[
+    ['NOMBRE REMITENTE',d.nombre_remitente||''],
+    ['N° INF. REMITENTE',d.num_inf_residente||''],
+    ['N° INF.','[auto]'],
+    ['ASUNTO',asunto.substring(0,55)+(asunto.length>55?'...':'')],
+    ['FOLIOS','2'],
+    ['FECHA',fecha],
+    ['OBRA',claveObra],
+    ['REMITIDO A',perfil.abrev_gerencia||perfil.gerente||d.destinatario||'GM'],
+  ];
+  document.getElementById('scols').innerHTML=colsSheet.map(([h,v])=>`<div class="sp-col"><div class="sp-h">${h}</div><div class="sp-v">${v||'—'}</div></div>`).join('');
+  document.getElementById('draft').value=borrador;
+  document.getElementById('cmsgs').innerHTML='<div class="msg msg-ai">Revisa el informe generado. Si algo está incorrecto dímelo aquí.</div>';
+  setStep(3);
+}
+
+// ══════ CHAT CORRECCIONES ══════
+async function chat() {
+  if(busy) return;
+  const inp=document.getElementById('cinput');
+  const msg=inp.value.trim(); if(!msg) return;
+  inp.value=''; busy=true;
+  const msgs=document.getElementById('cmsgs');
+  msgs.innerHTML+=`<div class="msg msg-user">${msg}</div>`;
+  msgs.innerHTML+=`<div class="msg msg-ai" id="mtyping" style="font-style:italic;opacity:.6">Actualizando...</div>`;
+  msgs.scrollTop=msgs.scrollHeight;
+  borrador=document.getElementById('draft').value;
+  chatHist.push({role:'user',parts:[{text:msg}]});
+  const sys=`Eres experto en documentos oficiales peruanos municipales.
+Borrador actual:\n${borrador}\nDatos extraídos: ${JSON.stringify(analisis.datos||{})}\nPerfil entidad: ${JSON.stringify(perfil)}
+El usuario pide una corrección. Devuelve ÚNICAMENTE el texto completo actualizado. Sin explicaciones, sin markdown.`;
+  try {
+    const res=await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+      {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({system_instruction:{parts:[{text:sys}]},contents:chatHist})}
+    );
+    const data=await res.json();
+    const resp=data.candidates?.[0]?.content?.parts?.[0]?.text||'';
+    borrador=resp.trim(); chatHist.push({role:'model',parts:[{text:resp}]});
+    document.getElementById('draft').value=borrador;
+    const mt=document.getElementById('mtyping');
+    if(mt){mt.textContent='✓ Informe actualizado.';mt.style='font-style:normal;opacity:1';mt.id='';}
+  } catch(e) {
+    const mt=document.getElementById('mtyping');
+    if(mt){mt.textContent='❌ Error. Intenta de nuevo.';mt.id='';}
+  }
+  busy=false; msgs.scrollTop=msgs.scrollHeight;
+}
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&document.activeElement===document.getElementById('cinput'))chat();});
+
+function copiar(){navigator.clipboard.writeText(document.getElementById('draft').value).then(()=>{alert('✅ Copiado');});}
+
+
+
+
+// REEMPLAZA CON ESTO:
+// ══════ DESCARGA WORD (desde plantilla Drive) ══════
+async function descargarWord() {
+  const tipo    = analisis.tipo || 'oc';
+  const numInf  = val('numInforme') || '___';
+  const d       = analisis.datos || {};
+  const waUrl   = cfgSheet.webapp || '';
+ 
+  // Construir datos con claves en MAYÚSCULAS para coincidir con {{MARCADORES}}
+  const anio = new Date().getFullYear();
+  const hoy  = new Date().toLocaleDateString('es-PE', {day:'2-digit', month:'long', year:'numeric'});
+  const datos = {
+    NUM_INFORME:            numInf,
+    ANIO:                   anio,
+    CODIGO:                 perfil.codigo     || '',
+    MUNICIPIO:              perfil.municipio  || '',
+    LEMA:                   perfil.lema       || '',
+    AREA:                   perfil.cargo_sub  || '',
+    LUGAR:                  perfil.lugar      || '',
+    FECHA_COMPLETA:         hoy,
+    NOMBRE_DESTINATARIO:    d.destinatario    || perfil.gerente || '',
+    CARGO_DESTINATARIO:     perfil.cargo_ger  || 'Gerente Municipal',
+    NOMBRE_REMITENTE:       perfil.subgerente || '',
+    CARGO_REMITENTE:        perfil.cargo_sub  || '',
+    NOMBRE_PROVEEDOR:       d.proveedor       || '',
+    RUC_PROVEEDOR:          d.ruc             || '',
+    NUM_OS:                 d.num_orden       || '',
+    NUM_OC:                 d.num_orden       || '',
+    DESCRIPCION_SERVICIO:   d.descripcion     || '',
+    DESCRIPCION_BIEN:       d.descripcion     || '',
+    DESCRIPCION_BREVE:      d.descripcion     || '',
+    NUM_SIAF:               d.num_siaf        || '',
+    META:                   d.meta            || '',
+    MONTO_NUM:              d.monto_num       || '',
+    NUM_GUIA:               d.num_guia        || '',
+    NUM_PECOSA:             d.num_pecosa      || '',
+    NUM_INFORME_REF:        d.num_inf_residente || '',
+    NUM_INFORME_PROVEEDOR:  d.num_inf_residente || '',
+    NOMBRE_OBRA_SI_APLICA:  d.nombre_obra ? ' — ' + d.nombre_obra : '',
+    NOMBRE_OBRA_O_ACTIVIDAD:d.nombre_obra     || '',
+    TIPO_DOCUMENTO_DERIVADO:d.descripcion     || '',
+    DESCRIPCION_DERIVACION: d.descripcion     || '',
+    ACCION_SOLICITADA:      'sirva elevar para los fines pertinentes',
+    DOCUMENTO_PRINCIPAL:    d.num_inf_residente || '',
+    REFERENCIAS_ADJUNTAS:   d.num_orden       || '',
+    NUM_FOLIOS:             '2',
+    DESTINO_DERIVACION:     perfil.gerente    || '',
+    ASUNTO_DERIVACION:      d.descripcion     || '',
+    ASUNTO_INFORME_TECNICO: d.descripcion     || '',
+    ANTECEDENTES:           '[Completar antecedentes]',
+    ANALISIS_TECNICO:       '[Completar análisis técnico]',
+    SITUACION_ACTUAL:       '[Completar situación actual]',
+    CONCLUSIONES:           '[Completar conclusiones]',
+    RECOMENDACIONES:        '[Completar recomendaciones]',
+    REFERENCIA:             d.num_inf_residente ? 'Informe N° ' + d.num_inf_residente : '---',
+    FINALIDAD_USO:          d.descripcion     || '',
+    TIPO_ORIGEN:            d.nombre_obra ? 'OBRA' : 'ACTIVIDAD',
+    DENOMINACION_SERVICIO:  d.descripcion     || '',
+    AREA_USUARIA:           perfil.cargo_sub  || '',
+    PLAZO_EJECUCION:        '[Indicar plazo]',
+    LUGAR_EJECUCION:        perfil.lugar      || '',
+    VALOR_REFERENCIAL:      d.monto_num       || '',
+    OBJETO_SERVICIO:        '[Describir objeto]',
+    ALCANCE_SERVICIO:       '[Describir alcance]',
+    PERFIL_PROVEEDOR:       '[Indicar requisitos]',
+    ENTREGABLES:            '[Indicar entregables]',
+    FORMA_PAGO:             'Único pago contra entrega de conformidad',
+    OBSERVACIONES_TDR:      '---',
+  };
+ 
+  // Si hay WebApp configurada: generar desde plantilla Drive (Word real)
+  if (waUrl) {
+    const btn = document.querySelector('.btn-success');
+    if (btn) { btn.disabled = true; btn.textContent = '⏳ Generando Word...'; }
+    try {
+      const res = await fetch(waUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          accion: 'generar_doc',
+          tipo,
+          datos,
+          drive_plantillas: cfgSheet.drivePlantillas || '',
+          drive_docs:       cfgSheet.driveDocs       || '',
+        })
+      });
+      const result = await res.json();
+      if (result.ok && result.url_descarga) {
+        // Abrir URL de descarga del Word real desde Drive
+        window.open(result.url_descarga, '_blank');
+        const ac1 = document.getElementById('ac1');
+        if (ac1) { ac1.classList.add('ok'); ac1.innerHTML = '<div class="ai-ico">💾</div>Word real descargado ✓'; }
+        showStatus(`✅ Guardado en Drive: ${result.nombre}`, 'ok');
+        return result;
+      } else {
+        throw new Error(result.error || 'Error al generar');
+      }
+    } catch (err) {
+      showStatus('⚠️ Drive no disponible — descargando Word básico: ' + err.message, 'info');
+      _descargarWordBasico();
+    } finally {
+      if (btn) { btn.disabled = false; btn.textContent = '✅ Confirmar y registrar'; }
+    }
+  } else {
+    // Sin WebApp: descarga el Word básico como antes
+    _descargarWordBasico();
+  }
+}
+ 
+// Fallback: Word básico (como estaba antes, por si falla Drive)
+function _descargarWordBasico() {
+  const texto = document.getElementById('draft').value;
+  const tipo  = analisis.tipo || 'oc';
+  const numInf = val('numInforme') || '___';
+  const anio  = new Date().getFullYear();
+  const lineas = texto.split('\n');
+  let body = '';
+  lineas.forEach((l, i) => {
+    if (i < 3 && l.trim()) { body += `<p style="text-align:center;font-weight:bold;font-size:12pt;margin:2pt 0">${l}</p>`; }
+    else if (l.startsWith('INFORME N°') || l.startsWith('INFORME TÉCNICO')) { body += `<p style="text-align:center;font-weight:bold;font-size:11pt;margin:8pt 0">${l}</p>`; }
+    else if (l.startsWith('A      :') || l.startsWith('DE     :') || l.startsWith('ASUNTO :')) { body += `<p style="margin:3pt 0;font-size:11pt">${l}</p>`; }
+    else if (l.trim() === '') { body += `<p style="margin:0">&nbsp;</p>`; }
+    else { body += `<p style="margin:4pt 0;font-size:11pt;text-align:justify">${l}</p>`; }
+  });
+  const html = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='UTF-8'><style>body{font-family:Arial,sans-serif;margin:2.5cm 3cm}p{line-height:1.5}</style></head><body>${body}</body></html>`;
+  const blob = new Blob([html], { type: 'application/msword;charset=utf-8' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a'); a.href = url; a.download = `Informe_${tipo.toUpperCase()}_${numInf}_${anio}.doc`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+}
+function _descargarComoWord(texto, nombreArchivo) {
+  const lineas = texto.split('\n');
+  let body = '';
+  lineas.forEach((l, i) => {
+    if (i < 3 && l.trim()) { body += `<p style="text-align:center;font-weight:bold;font-size:12pt;margin:2pt 0">${l}</p>`; }
+    else if (l.match(/^(INFORME|MEMORÁNDUM|OFICIO|CIRCULAR|PROVEÍDO|RESOLUCIÓN|REQUERIMIENTO|CONFORMIDAD)/i)) { body += `<p style="text-align:center;font-weight:bold;font-size:11pt;margin:8pt 0">${l}</p>`; }
+    else if (l.startsWith('A      :') || l.startsWith('DE     :') || l.startsWith('ASUNTO :') || l.startsWith('PARA   :') || l.startsWith('REFERENCIA:')) { body += `<p style="margin:3pt 0;font-size:11pt">${l}</p>`; }
+    else if (l.trim() === '') { body += `<p style="margin:0">&nbsp;</p>`; }
+    else { body += `<p style="margin:4pt 0;font-size:11pt;text-align:justify">${l}</p>`; }
+  });
+  const html = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='UTF-8'><style>body{font-family:Arial,sans-serif;margin:2.5cm 3cm}p{line-height:1.5}</style></head><body>${body}</body></html>`;
+  const blob = new Blob([html], { type: 'application/msword;charset=utf-8' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a'); a.href = url; a.download = nombreArchivo;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+} // compatibilidad admin/residencia
+ 
+
+
+// REEMPLAZA CON ESTO:
+// ══════ CONFIRMAR Y REGISTRAR ══════
+async function confirmar() {
+  borrador = document.getElementById('draft').value;
+  const d       = analisis.datos || {};
+  const tipo    = analisis.tipo  || 'oc';
+  const tmpl    = PLANTILLAS[tipo] || PLANTILLAS.oc;
+  const numInf  = val('numInforme') || '___';
+  const fecha   = new Date().toLocaleDateString('es-PE', {day:'2-digit', month:'2-digit', year:'numeric'});
+  const asunto  = tipo === 'oc'  ? `CONFORMIDAD DE O/C N° ${d.num_orden||''} - ${d.descripcion||''}` :
+                  tipo === 'os'  ? `CONFORMIDAD DE O/S N° ${d.num_orden||''} - ${d.descripcion||''}` :
+                  d.descripcion || '';
+ 
+  document.getElementById('sdesc').textContent = `${tmpl.nombre} | ${d.proveedor || d.descripcion || '—'} | ${d.monto_num || '—'}`;
+  setStep(5);
+ 
+  // Generar Word desde plantilla Drive (o fallback básico)
+  const resultadoDrive = await descargarWord();
+ 
+  // Si Drive generó el archivo, ac3 ya se marcó como ok dentro de descargarWord()
+  // Si no, marcarlo aquí como fallback
+  setTimeout(() => {
+    const ac1 = document.getElementById('ac1');
+    if (ac1 && !ac1.classList.contains('ok')) {
+      ac1.classList.add('ok'); ac1.innerHTML = '<div class="ai-ico">💾</div>Word descargado ✓';
+    }
+  }, 600);
+ 
+  // Registrar en Sheet (separado de Drive)
+  const claveObra = d.nombre_obra ? d.nombre_obra.split(' ').slice(0,3).join(' ').toUpperCase() : (perfil.codigo || '');
+  const payloadSheet = {
+    // accion NO especificada → tu doPost actual lo procesa como registro de Sheet
+    sheet_id: cfgSheet.sheetId || '', hoja: cfgSheet.hoja || 'INF. EMIT.',
+    num_informe: numInf, nombre_remitente: d.nombre_remitente || '',
+    num_inf_remitente: d.num_inf_residente || '', asunto,
+    num_folios: '2', nombre_obra: claveObra,
+    destinatario: perfil.abrev_gerencia || perfil.gerente || d.destinatario || 'GM',
+  };
+  const waUrl = cfgSheet.webapp || '';
+  if (waUrl) {
+    try {
+      // Usar GET con parámetros URL — evita problema CORS de doPost
+      const params = new URLSearchParams({
+        accion:           'registrar',
+        sheet_id:         payloadSheet.sheet_id,
+        hoja:             payloadSheet.hoja,
+        num_informe:      payloadSheet.num_informe,
+        nombre_remitente: payloadSheet.nombre_remitente,
+        num_inf_remitente:payloadSheet.num_inf_remitente,
+        asunto:           payloadSheet.asunto,
+        num_folios:       payloadSheet.num_folios,
+        nombre_obra:      payloadSheet.nombre_obra,
+        destinatario:     payloadSheet.destinatario,
+      });
+      const res  = await fetch(waUrl + '?' + params.toString());
+      const data = await res.json();
+      const ac2  = document.getElementById('ac2');
+      if (data.ok) {
+        if (ac2) { ac2.classList.add('ok'); ac2.innerHTML = '<div class="ai-ico">📊</div>Sheet registrado ✓'; }
+        if (!resultadoDrive) showStatus('✅ Registrado en el Sheet — N° ' + data.num_informe, 'ok');
+      } else {
+        if (ac2) { ac2.innerHTML = '<div class="ai-ico">⚠️</div>Sheet: ' + (data.error||'Error'); }
+        showStatus('⚠️ Sheet: ' + (data.error||'Error desconocido'), 'err');
+      }
+      const ac3 = document.getElementById('ac3');
+      if (ac3 && !ac3.classList.contains('ok')) {
+        // ac3 solo se marca ok si Drive realmente generó el archivo
+        if(resultadoDrive && resultadoDrive.ok) {
+          ac3.classList.add('ok'); ac3.innerHTML = '<div class="ai-ico">📁</div>Drive guardado ✓';
+        } else {
+          ac3.innerHTML = '<div class="ai-ico">⚠️</div>Drive: no conectado';
+        }
+      }
+    } catch(e) { showStatus('⚠️ No se pudo conectar: ' + e.message, 'err'); }
+  } else {
+    showStatus('⚠️ Web App no configurada — el informe no se registró en el Sheet ni en Drive. Puedes configurarla en ⚙️ Configuración → Web App.', 'err');
+    const ac2 = document.getElementById('ac2');
+    const ac3 = document.getElementById('ac3');
+    if(ac2) ac2.innerHTML = '<div class="ai-ico">⚠️</div>Sheet: sin configurar';
+    if(ac3) ac3.innerHTML = '<div class="ai-ico">⚠️</div>Drive: sin configurar';
+  }
+ 
+  historial.unshift({ tipo: tmpl.nombre, proveedor: d.proveedor || d.descripcion || '—', oc: d.num_orden || '—', monto: d.monto_num || '—', fecha, numInf, estado: '✓' });
+  localStorage.setItem('hist', JSON.stringify(historial));
+  renderHist();
+}
+ 
+
+
+function showStatus(msg,type){
+  const cls=type==='ok'?'st-ok':type==='err'?'st-err':'st-info';
+  document.getElementById('stdiv').innerHTML=`<div class="status-msg ${cls}">${msg}</div>`;
+}
+
+// ══════ HISTORIAL ══════
+function renderHist() {
+  const hb=document.getElementById('hbody');
+  const hv=document.getElementById('hvacio');
+  const badge=document.getElementById('hist-badge');
+  if(!hb) return;
+  if(!historial.length){if(hv)hv.style.display='block';if(badge)badge.style.display='none';return;}
+  if(hv)hv.style.display='none';
+  if(badge){badge.style.display='inline';badge.textContent=historial.length;}
+  const pm={'Conformidad O/C':'pill-oc','Conformidad O/S':'pill-os','Derivación / Remisión':'pill-der','Memorándum':'pill-mem','Oficio':'pill-der','Circular':'pill-der','Informe Adm.':'pill-oc','Requerimiento':'pill-res','Conformidad':'pill-os'};
+  hb.innerHTML=historial.slice(0,50).map((h,i)=>
+    `<tr>
+      <td><strong>${h.numInf||historial.length-i}</strong></td>
+      <td><span class="pill ${pm[h.tipo]||'pill-oc'}">${h.tipo}</span></td>
+      <td>${h.proveedor}</td>
+      <td style="font-family:var(--mono);font-size:12px">${h.oc}</td>
+      <td style="font-family:var(--mono);font-size:12px">${h.monto}</td>
+      <td>${h.fecha}</td>
+      <td style="color:var(--success);font-weight:700">${h.estado}</td>
+    </tr>`
+  ).join('');
+}
+function exportCSV() {
+  if(!historial.length){alert('Sin registros');return;}
+  const cab='Nº INF.,Tipo,Remitente/Asunto,N° OC/OS,Monto,Fecha,Estado\n';
+  const f=historial.map(h=>`"${h.numInf||''}","${h.tipo}","${h.proveedor}","${h.oc}","${h.monto}","${h.fecha}","${h.estado}"`).join('\n');
+  const blob=new Blob([cab+f],{type:'text/csv;charset=utf-8'});
+  const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='historial_gesdoc.csv';document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+}
+
+// ══════ RESET ══════
+function resetNuevo() {
+  archivo=b64=mime=null;borrador='';analisis={};chatHist=[];busy=false;
+  document.getElementById('fileinput').value='';
+  document.getElementById('fprev').style.display='none';
+  document.getElementById('imgprev').style.display='none';
+  document.getElementById('btnproc').disabled=true;
+  document.getElementById('numInforme').value='';
+  document.getElementById('num-auto-badge').style.display='none';
+  document.getElementById('agente-box').style.display='none';
+  ['ac1','ac2','ac3'].forEach(id=>{const e=document.getElementById(id);if(!e)return;e.classList.remove('ok');});
+  document.getElementById('ac1').innerHTML='<div class="ai-ico">💾</div>Descargando Word...';
+  document.getElementById('ac2').innerHTML='<div class="ai-ico">📊</div>Registrando en Sheet...';
+  document.getElementById('ac3').innerHTML='<div class="ai-ico">📁</div>Guardando en Drive...';
+  document.getElementById('stdiv').innerHTML='';
+  setStep(1);
+  showPanel('nuevo');
+}
+
+// ══════ MÓDULO ADMINISTRATIVO ══════
+const TITULOS_ADM = {memorandum:'Memorándum',oficio:'Oficio',circular:'Circular',proveido:'Proveído',resolucion:'Resolución',informe_adm:'Informe Administrativo'};
+const ICONOS_ADM = {memorandum:'📝',oficio:'📨',circular:'📢',proveido:'✍️',resolucion:'⚖️',informe_adm:'📊'};
+
+function abrirDocAdmin(tipo) {
+  admDocTipo=tipo;
+  document.getElementById('adm-form-titulo').textContent=TITULOS_ADM[tipo]||tipo;
+  document.getElementById('adm-form-ico').textContent=ICONOS_ADM[tipo]||'📝';
+  // Prellenar remitente con perfil
+  document.getElementById('adm-de').value=perfil.subgerente?perfil.subgerente+' — '+perfil.cargo_sub:'';
+  document.getElementById('adm-para').value=perfil.gerente?perfil.gerente+' — '+perfil.cargo_ger:'';
+  document.getElementById('adm-form-card').style.display='block';
+  document.getElementById('adm-result-card').style.display='none';
+  document.getElementById('adm-form-card').scrollIntoView({behavior:'smooth'});
+}
+
+async function generarDocAdmin() {
+  if(!apiKey){alert('Configura tu API Key primero');return;}
+  const tipo=admDocTipo;
+  const numDoc=val('adm-num')||'___';
+  const fechaEl=document.getElementById('adm-fecha');
+  const fechaVal=fechaEl?.value;
+  const fecha=fechaVal?new Date(fechaVal+'T12:00:00').toLocaleDateString('es-PE',{day:'2-digit',month:'long',year:'numeric'}):new Date().toLocaleDateString('es-PE',{day:'2-digit',month:'long',year:'numeric'});
+  const para=val('adm-para');
+  const de=val('adm-de')||perfil.subgerente||'[Remitente]';
+  const asunto=val('adm-asunto');
+  const cuerpo=val('adm-cuerpo');
+  const referencia=val('adm-referencia');
+  const anio=new Date().getFullYear();
+  const municipio=perfil.municipio||'[ENTIDAD]';
+  const lema=perfil.lema||'';
+  const codigo=perfil.codigo||'[CODIGO]';
+  const lugar=perfil.lugar||'[Lugar]';
+
+  const prompt=`Eres experto en redacción de documentos oficiales peruanos del sector público.
+Genera un ${TITULOS_ADM[tipo]||tipo} oficial completo con la siguiente estructura y datos:
+
+DATOS:
+- Entidad: ${municipio}
+- Lema: ${lema}
+- N° documento: ${numDoc}-${anio}-${codigo}
+- Para: ${para}
+- De: ${de}
+- Asunto: ${asunto}
+- Referencia: ${referencia||'—'}
+- Lugar y fecha: ${lugar}, ${fecha}
+- Cuerpo adicional del usuario: ${cuerpo||'(generar contenido apropiado para el tipo de documento y asunto)'}
+
+Genera el documento completo respetando el formato oficial peruano: encabezado con nombre de entidad y lema, membrete, número de documento, campos A/DE/ASUNTO, cuerpo, despedida, firma. Solo devuelve el texto del documento, sin explicaciones.`;
+
+  const btn=document.querySelector('#adm-form-card .btn-adm');
+  if(btn){btn.disabled=true;btn.textContent='⏳ Generando...';}
+  try {
+    const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt}]}]})});
+    const data=await res.json();
+    const txt=data.candidates?.[0]?.content?.parts?.[0]?.text||'';
+    if(!txt){alert('❌ Gemini no devolvió contenido. Intenta de nuevo o revisa tu API Key.');return;}
+    document.getElementById('adm-draft').value=txt;
+    document.getElementById('adm-draft-label').textContent=`📄 ${TITULOS_ADM[tipo]||tipo} generado`;
+    document.getElementById('adm-result-card').style.display='block';
+    document.getElementById('adm-result-card').scrollIntoView({behavior:'smooth'});
+  } catch(e){alert('❌ Error: '+e.message);}
+  finally{if(btn){btn.disabled=false;btn.innerHTML='🤖 Generar documento';}}
+}
+
+function copiarAdmin(){navigator.clipboard.writeText(document.getElementById('adm-draft').value).then(()=>{alert('✅ Copiado');});}
+function descargarWordAdmin(){
+  const tipo=admDocTipo;
+  const numDoc=val('adm-num')||'___';
+  const anio=new Date().getFullYear();
+  _descargarComoWord(document.getElementById('adm-draft').value,`${TITULOS_ADM[tipo]||tipo}_${numDoc}_${anio}.doc`);
+}
+async function confirmarAdmin(){
+  descargarWordAdmin();
+  const tipo=admDocTipo; const asunto=val('adm-asunto');
+  const fecha=new Date().toLocaleDateString('es-PE',{day:'2-digit',month:'2-digit',year:'numeric'});
+  const numDoc=val('adm-num')||'___';
+  historial.unshift({tipo:TITULOS_ADM[tipo]||tipo,proveedor:asunto,oc:'—',monto:'—',fecha,numInf:numDoc,estado:'✓'});
+  localStorage.setItem('hist',JSON.stringify(historial)); renderHist();
+  actualizarStatsAdm();
+  const waUrl=cfgSheet.webapp||'';
+  if(waUrl) {
+    const payload={sheet_id:cfgSheet.sheetId||'',hoja:cfgSheet.hoja||'INF. EMIT.',
+      num_informe:numDoc,nombre_remitente:perfil.subgerente||'',num_inf_remitente:'',
+      asunto,num_folios:'1',nombre_obra:perfil.abrev_gerencia||perfil.codigo||'ADM',
+      destinatario:val('adm-para').split(' ')[0]||'GM'};
+    try{
+      const p=new URLSearchParams({accion:'registrar',...payload});
+      const res=await fetch(waUrl+'?'+p.toString());
+      const data=await res.json().catch(()=>({}));
+      if(data.ok){
+        mostrarMiniStatus('adm-status','✅ Documento registrado y guardado en el Sheet','ok');
+      } else {
+        mostrarMiniStatus('adm-status','⚠️ Guardado local ✓ — Sheet: '+(data.error||'No se pudo registrar. Verifica la Web App.'),'err');
+      }
+    }catch(e){
+      mostrarMiniStatus('adm-status','⚠️ Guardado local ✓ — No se pudo conectar al Sheet: '+e.message+'. Revisa la configuración de Web App.','err');
+    }
+  } else {
+    mostrarMiniStatus('adm-status','✅ Documento guardado localmente. (Web App no configurada — no se registró en el Sheet)','st-info');
+  }
+}
+function actualizarStatsAdm(){
+  const total=historial.length;
+  const mesActual=new Date().getMonth()+1;
+  const anioActual=new Date().getFullYear();
+  const mes=historial.filter(h=>{
+    if(!h.fecha) return false;
+    const f=h.fecha.split('/');
+    if(f.length!==3) return false;
+    return parseInt(f[1])===mesActual && parseInt(f[2])===anioActual;
+  }).length;
+  document.getElementById('adm-stat-total').textContent=total;
+  document.getElementById('adm-stat-mes').textContent=mes;
+  // Pendientes: documentos sin estado confirmado (no usados por ahora, mostrar 0)
+  const pendEl=document.getElementById('adm-stat-pendientes');
+  if(pendEl) pendEl.textContent='0';
+}
+
+// ══════ MÓDULO RESIDENCIA ══════
+const TITULOS_RES={requerimiento:'Requerimiento',conformidad:'Conformidad',memorandum_obra:'Memorándum de Obra',especificacion:'Especificaciones Técnicas',informe_obra:'Informe de Obra',cuaderno:'Cuaderno de Obra'};
+const ICONOS_RES={requerimiento:'📋',conformidad:'✅',memorandum_obra:'📝',especificacion:'📐',informe_obra:'📊',cuaderno:'📓'};
+
+function selResDoc(tipo) {
+  resDocTipo=tipo;
+  document.querySelectorAll('.res-doc-type').forEach(el=>el.classList.remove('selected'));
+  document.getElementById('rdt-'+tipo)?.classList.add('selected');
+  document.getElementById('res-form-titulo').textContent=TITULOS_RES[tipo]||tipo;
+  document.getElementById('res-form-ico').textContent=ICONOS_RES[tipo]||'📋';
+  // Mostrar zona de imágenes solo para especificaciones e informe de obra
+  document.getElementById('res-img-section').style.display=(tipo==='especificacion'||tipo==='informe_obra')?'block':'none';
+  // Mostrar/ocultar ítems
+  document.getElementById('res-items-section').style.display=(tipo==='requerimiento')?'block':'none';
+  document.getElementById('res-form-card').style.display='block';
+  document.getElementById('res-result-card').style.display='none';
+  document.getElementById('res-form-card').scrollIntoView({behavior:'smooth'});
+}
+
+// Imágenes residencia
+document.getElementById('res-img-input').addEventListener('change',e=>{
+  for(const f of e.target.files) {
+    const r=new FileReader();
+    r.onload=ev=>{
+      resImagenes.push({name:f.name,data:ev.target.result});
+      renderResImgs();
+    };
+    r.readAsDataURL(f);
+  }
+});
+function renderResImgs(){
+  const c=document.getElementById('res-img-preview');
+  if(!c) return;
+  c.innerHTML=resImagenes.map((img,i)=>`
+    <div class="res-img-thumb">
+      <img src="${img.data}" alt="${img.name}">
+      <button class="del" onclick="eliminarResImg(${i})">✕</button>
+    </div>`).join('');
+}
+function eliminarResImg(i){resImagenes.splice(i,1);renderResImgs();}
+
+async function generarDocRes(){
+  if(!apiKey){alert('Configura tu API Key primero');return;}
+  const tipo=resDocTipo;
+  const numDoc=val('res-num')||'___';
+  const obra=val('res-obra')||'[Nombre de la obra]';
+  const meta=val('res-meta')||'___';
+  const fechaEl=document.getElementById('res-fecha');
+  const fechaVal=fechaEl?.value;
+  const fecha=fechaVal?new Date(fechaVal+'T12:00:00').toLocaleDateString('es-PE',{day:'2-digit',month:'long',year:'numeric'}):new Date().toLocaleDateString('es-PE',{day:'2-digit',month:'long',year:'numeric'});
+  const para=val('res-para')||perfil.gerente||'[Destinatario]';
+  const asunto=val('res-asunto');
+  const items=val('res-items');
+  const desc=val('res-desc');
+  const anio=new Date().getFullYear();
+  const municipio=perfil.municipio||'[ENTIDAD]';
+  const lema=perfil.lema||'';
+  const subgerente=perfil.subgerente||'[Residente/Subgerente]';
+  const cargoSub=perfil.cargo_sub||'[Cargo]';
+  const codigo=perfil.codigo||'[CODIGO]';
+  const lugar=perfil.lugar||'[Lugar]';
+
+  const prompt=`Eres experto en documentos de obras públicas peruanas y residencia de obra.
+Genera un ${TITULOS_RES[tipo]||tipo} oficial completo con estos datos:
+
+DATOS:
+- Entidad: ${municipio}
+- Lema: ${lema}
+- N° documento: ${numDoc}-${anio}-${codigo}
+- Obra: ${obra}
+- Meta presupuestal: ${meta}
+- Para: ${para}
+- De: ${subgerente} — ${cargoSub}
+- Asunto: ${asunto}
+- Lugar y fecha: ${lugar}, ${fecha}
+${items?'- Ítems/materiales:\n'+items:''}
+- Descripción adicional: ${desc||'(generar contenido técnico apropiado)'}
+${resImagenes.length?'- El documento incluye '+resImagenes.length+' imagen(es) de sustento (mencionar en el documento que se adjuntan fotos/evidencias)':''}
+
+Genera el documento completo en formato oficial peruano para obras públicas. Incluye encabezado institucional con entidad y lema, número de documento, campos A/DE/ASUNTO, cuerpo técnico, y firma. Para requerimientos incluir tabla de ítems. Para especificaciones técnicas incluir descripción detallada y mencionar evidencias fotográficas adjuntas. Solo devuelve el texto del documento.`;
+
+  const btn=document.querySelector('#res-form-card .btn-res');
+  if(btn){btn.disabled=true;btn.textContent='⏳ Generando...';}
+  try{
+    const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt}]}]})});
+    const data=await res.json();
+    if(data.error) throw new Error(data.error.message||'Error de API Gemini');
+    const txt=data.candidates?.[0]?.content?.parts?.[0]?.text||'';
+    if(!txt){alert('❌ Gemini no devolvió contenido. Intenta de nuevo o revisa tu API Key.');return;}
+    resBorrador=txt;
+    document.getElementById('res-draft').value=txt;
+    document.getElementById('res-draft-label').textContent=`📄 ${TITULOS_RES[tipo]||tipo} generado`;
+    document.getElementById('res-result-card').style.display='block';
+    document.getElementById('res-result-card').scrollIntoView({behavior:'smooth'});
+    // Agente validador residencia
+    setTimeout(()=>ejecutarAgenteValidadorRes(),600);
+  }catch(e){alert('❌ Error: '+e.message);}
+  finally{if(btn){btn.disabled=false;btn.innerHTML='🤖 Generar documento';}}
+}
+
+async function ejecutarAgenteValidadorRes(){
+  if(!apiKey) return;
+  const box=document.getElementById('res-agente-box');
+  const loading=document.getElementById('res-agente-loading');
+  const result=document.getElementById('res-agente-result');
+  if(!box) return;
+  box.style.display='block';loading.style.display='flex';result.style.display='none';
+  const draft=document.getElementById('res-draft').value;
+  const prompt=`Eres agente validador de documentos de obras públicas peruanas. Analiza este documento y determina:
+1. ¿Tiene coherencia técnica y formal?
+2. ¿Los datos son completos para el tipo de documento?
+3. ¿Cumple formato oficial peruano para obras?
+Documento: ${draft.slice(0,800)}
+Responde JSON: {"es_coherente":true/false,"puntaje":0-100,"observaciones":[],"aprobado":true/false,"sugerencias":[]}`;
+  try{
+    const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt}]}]})});
+    const data=await res.json();
+    let txt=data.candidates?.[0]?.content?.parts?.[0]?.text||'{}';
+    txt=txt.replace(/```json/gi,'').replace(/```/g,'').trim();
+    const r=JSON.parse(txt);
+    loading.style.display='none';result.style.display='block';
+    const icono=r.aprobado?'✅':r.puntaje>60?'⚠️':'❌';
+    let html=`<div style="font-weight:700;margin-bottom:6px">${icono} Coherencia: ${r.puntaje}/100 — ${r.aprobado?'Aprobado':'Revisar'}</div>`;
+    if(r.observaciones?.length) html+=r.observaciones.map(o=>`<span class="agente-badge ab-warn">⚠️ ${o}</span>`).join('');
+    if(r.sugerencias?.length) html+=`<div style="margin-top:4px">`+r.sugerencias.map(s=>`<span class="agente-badge ab-ok">💡 ${s}</span>`).join('')+`</div>`;
+    result.innerHTML=html;
+  }catch(e){loading.style.display='none';result.style.display='block';result.innerHTML='<span style="font-size:12px;color:var(--ink3)">No se pudo validar.</span>';}
+}
+
+async function chatRes(){
+  const inp=document.getElementById('res-cinput');
+  const msg=inp.value.trim(); if(!msg||busy) return;
+  inp.value=''; busy=true;
+  const msgs=document.getElementById('res-cmsgs');
+  msgs.innerHTML+=`<div class="msg msg-user">${msg}</div>`;
+  msgs.innerHTML+=`<div class="msg msg-ai" id="res-mtyping" style="font-style:italic;opacity:.6">Actualizando...</div>`;
+  resBorrador=document.getElementById('res-draft').value;
+  const sys=`Eres experto en documentos de obras públicas peruanas. Borrador actual:\n${resBorrador}\nEl usuario pide una corrección. Devuelve ÚNICAMENTE el texto completo actualizado. Sin explicaciones.`;
+  try{
+    const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:sys+'\n\nCorreción solicitada: '+msg}]}]})});
+    const data=await res.json();
+    const txt=data.candidates?.[0]?.content?.parts?.[0]?.text||'';
+    resBorrador=txt;document.getElementById('res-draft').value=txt;
+    const mt=document.getElementById('res-mtyping');if(mt){mt.textContent='✓ Actualizado.';mt.id='';}
+  }catch(e){const mt=document.getElementById('res-mtyping');if(mt){mt.textContent='❌ Error.';mt.id='';}}
+  busy=false;msgs.scrollTop=msgs.scrollHeight;
+}
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&document.activeElement===document.getElementById('res-cinput'))chatRes();});
+
+function copiarRes(){navigator.clipboard.writeText(document.getElementById('res-draft').value).then(()=>{alert('✅ Copiado');});}
+function descargarWordRes(){
+  const tipo=resDocTipo;const numDoc=val('res-num')||'___';const anio=new Date().getFullYear();
+  _descargarComoWord(document.getElementById('res-draft').value,`${TITULOS_RES[tipo]||tipo}_${numDoc}_${anio}.doc`);
+}
+async function confirmarRes(){
+  descargarWordRes();
+  const tipo=resDocTipo;const asunto=val('res-asunto');const obra=val('res-obra');
+  const fecha=new Date().toLocaleDateString('es-PE',{day:'2-digit',month:'2-digit',year:'numeric'});
+  const numDoc=val('res-num')||'___';
+  historial.unshift({tipo:TITULOS_RES[tipo]||tipo,proveedor:asunto||obra,oc:'—',monto:'—',fecha,numInf:numDoc,estado:'✓'});
+  localStorage.setItem('hist',JSON.stringify(historial));renderHist();
+  const badgeRes=document.getElementById('res-badge');
+  if(badgeRes){const c=parseInt(badgeRes.textContent||'0');badgeRes.textContent=c+1;badgeRes.style.display='inline';}
+  const waUrl=cfgSheet.webapp||'';
+  if(waUrl){
+    const claveObra=obra?obra.split(' ').slice(0,3).join(' ').toUpperCase():'OBRA';
+    const payload={sheet_id:cfgSheet.sheetId||'',hoja:cfgSheet.hoja||'INF. EMIT.',
+      num_informe:numDoc,nombre_remitente:perfil.subgerente||'',num_inf_remitente:'',
+      asunto,num_folios:'2',nombre_obra:claveObra,destinatario:perfil.abrev_gerencia||'GM'};
+    try{
+      const p=new URLSearchParams({accion:'registrar',...payload});
+      const res=await fetch(waUrl+'?'+p.toString());
+      const data=await res.json().catch(()=>({}));
+      if(data.ok){
+        mostrarMiniStatus('res-status','✅ Documento registrado y guardado en el Sheet','ok');
+      } else {
+        mostrarMiniStatus('res-status','⚠️ Guardado local ✓ — Sheet: '+(data.error||'No se pudo registrar. Verifica la Web App.'),'err');
+      }
+    }catch(e){
+      mostrarMiniStatus('res-status','⚠️ Guardado local ✓ — No se pudo conectar al Sheet: '+e.message+'. Revisa la configuración de Web App.','err');
+    }
+  } else {
+    mostrarMiniStatus('res-status','✅ Documento guardado localmente. (Web App no configurada — no se registró en el Sheet)','st-info');
+  }
+}
+
+// ══════ MODAL CLICK OUTSIDE ══════
+document.getElementById('modal-perfil').addEventListener('click',function(e){if(e.target===this)cerrarPerfil();});
+</script>
+</body>
+</html>
