@@ -286,6 +286,16 @@ input[type="file"]{display:none}
 .inf-num-row .inf-hint{font-size:12px;color:var(--amber);opacity:.8}
 .inf-num-auto{font-size:11px;background:var(--teal-l);border:1px solid var(--teal-m);color:var(--teal);border-radius:20px;padding:2px 10px;font-weight:700;white-space:nowrap}
 
+.draft-tab{background:rgba(255,255,255,.08);border:none;border-bottom:2px solid transparent;color:rgba(255,255,255,.6);padding:8px 14px;font-size:12px;font-weight:600;font-family:var(--sans);cursor:pointer;transition:.15s}
+.draft-tab:hover{color:#fff;background:rgba(255,255,255,.14)}
+.draft-tab.active{color:#fff;border-bottom-color:var(--teal);background:rgba(255,255,255,.12)}
+#doc-render{counter-reset:none}
+#doc-render .doc-header{text-align:center;font-weight:bold;margin-bottom:6px}
+#doc-render .doc-num{text-align:center;font-weight:bold;margin:12px 0}
+#doc-render .doc-field{margin:2px 0}
+#doc-render .doc-body{text-align:justify;margin:10px 0}
+#doc-render .doc-firma{margin-top:40px;text-align:center}
+
 /* ══ DRAFT ══ */
 .draft-wrap{margin-bottom:16px}
 .draft-head{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--ink2);border-radius:var(--radius) var(--radius) 0 0}
@@ -587,16 +597,21 @@ table.hist tr:hover td{background:var(--surface)}
             <div class="upload-zone" id="uzone">
               <div class="uz-ico">📤</div>
               <div class="uz-title">Arrastra aquí o haz clic para seleccionar</div>
-              <div class="uz-sub">Foto del celular, PDF escaneado, Word — cualquier formato</div>
+              <div class="uz-sub">Puedes subir <strong>varias fotos</strong> a la vez — cada foto cuenta como 1 folio</div>
               <div class="uz-tags">
-                <span class="uz-tag">📄 PDF</span>
+                <span class="uz-tag">📄 PDF (páginas auto)</span>
                 <span class="uz-tag">🖼️ JPG / PNG</span>
-                <span class="uz-tag">📱 Foto celular</span>
+                <span class="uz-tag">📱 Varias fotos</span>
                 <span class="uz-tag">📝 DOCX</span>
               </div>
             </div>
           </label>
-          <input type="file" id="fileinput" accept=".pdf,.png,.jpg,.jpeg,.webp,.docx">
+          <input type="file" id="fileinput" accept=".pdf,.png,.jpg,.jpeg,.webp,.docx" multiple>
+          <!-- Preview múltiples archivos -->
+          <div id="multi-preview" style="display:none;margin-top:12px;display:none">
+            <div style="font-size:12px;font-weight:700;color:var(--teal);margin-bottom:8px" id="multi-count"></div>
+            <div id="multi-thumbs" style="display:flex;flex-wrap:wrap;gap:8px"></div>
+          </div>
           <img id="imgprev" alt="Vista previa">
           <div class="file-preview" id="fprev">
             <div class="fp-ico" id="ficon">📄</div>
@@ -657,6 +672,13 @@ table.hist tr:hover td{background:var(--surface)}
             <span class="inf-hint">Número correlativo (el sistema sugiere el siguiente)</span>
           </div>
 
+          <!-- FOLIOS -->
+          <div class="inf-num-row" style="background:var(--teal-l);border-color:var(--teal-m)">
+            <label style="color:var(--teal)">📄 Folios:</label>
+            <input type="number" id="numFolios" placeholder="2" min="1" max="99" style="width:70px;border:1px solid var(--teal-m);border-radius:6px;padding:7px 10px;font-size:14px;font-weight:700;font-family:var(--mono);text-align:center;background:#fff" oninput="window._foliosCalculados=this.value">
+            <span style="font-size:12px;color:var(--teal);opacity:.8">Hojas del expediente (editable)</span>
+          </div>
+
           <!-- DATOS EXTRAÍDOS -->
           <div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:10px;display:flex;align-items:center;gap:7px">📊 Datos extraídos del expediente</div>
           <div class="data-grid" id="dgrid"></div>
@@ -667,16 +689,24 @@ table.hist tr:hover td{background:var(--surface)}
             <div class="sp-cols" id="scols"></div>
           </div>
 
-          <!-- BORRADOR -->
+          <!-- BORRADOR: VISTA DOCUMENTO + EDITOR -->
           <div class="draft-wrap">
             <div class="draft-head">
-              <span>📄 Informe generado — editable directamente</span>
+              <div style="display:flex;gap:0">
+                <button class="draft-tab active" id="tab-doc" onclick="switchDraftTab('doc')">📄 Vista Documento</button>
+                <button class="draft-tab" id="tab-edit" onclick="switchDraftTab('edit')">✏️ Editar texto</button>
+              </div>
               <div class="draft-actions">
                 <button class="draft-btn" onclick="copiar()">📋 Copiar</button>
                 <button class="draft-btn" onclick="descargarWord()">⬇ Word</button>
               </div>
             </div>
-            <textarea id="draft" spellcheck="true"></textarea>
+            <!-- Vista documento formateada -->
+            <div id="draft-doc-view" style="background:#fff;border:1px solid var(--line);border-top:none;border-radius:0 0 var(--radius) var(--radius);padding:0;overflow:hidden">
+              <div id="doc-render" style="font-family:Arial,sans-serif;font-size:11.5pt;line-height:1.8;color:#000;padding:40px 50px;min-height:400px;background:#fff;white-space:pre-wrap;border-left:4px solid var(--teal)"></div>
+            </div>
+            <!-- Editor de texto -->
+            <textarea id="draft" spellcheck="true" style="display:none" oninput="sincronizarDocView()"></textarea>
           </div>
 
           <!-- CHAT CORRECCIONES -->
@@ -1723,48 +1753,162 @@ function guardarKeyBar() {
 async function consultarUltimoNum() {
   if(!cfgSheet.webapp || !cfgSheet.sheetId) return;
   try {
-    const url = cfgSheet.webapp + '?sheet_id='+cfgSheet.sheetId+'&hoja='+(cfgSheet.hoja||'INF. EMIT.');
-    const res = await fetch(url, {mode:'no-cors'});
-    // no-cors no permite leer la respuesta, pero al menos no da error
+    const url = cfgSheet.webapp + '?accion=ultimo_num&sheet_id='+cfgSheet.sheetId+'&hoja='+(cfgSheet.hoja||'INF. EMIT.');
+    const res = await fetch(url);
+    const data = await res.json().catch(()=>null);
+    if(data && data.siguiente) {
+      document.getElementById('numInforme').value = String(data.siguiente).padStart(3,'0');
+      document.getElementById('num-auto-badge').style.display = 'inline-flex';
+      actualizarNumInf();
+    }
+  } catch(e) {
+    // Silencioso — fallback al historial local
+  }
+}
+
+async function consultarUltimoNumYActualizar() {
+  if(!cfgSheet.webapp || !cfgSheet.sheetId) return;
+  try {
+    const url = cfgSheet.webapp + '?accion=ultimo_num&sheet_id='+cfgSheet.sheetId+'&hoja='+(cfgSheet.hoja||'INF. EMIT.');
+    const res = await fetch(url);
+    const data = await res.json().catch(()=>null);
+    if(data && data.siguiente) {
+      const numEl = document.getElementById('numInforme');
+      numEl.value = String(data.siguiente).padStart(3,'0');
+      document.getElementById('num-auto-badge').style.display = 'inline-flex';
+      // Actualizar borrador y vista previa con el nuevo número
+      actualizarNumInf();
+      // Actualizar celda N° INF. en sheet preview
+      const scols = document.getElementById('scols');
+      if(scols) {
+        scols.querySelectorAll('.sp-col').forEach(col => {
+          if(col.querySelector('.sp-h')?.textContent === 'N° INF.') {
+            col.querySelector('.sp-v').textContent = numEl.value;
+          }
+        });
+      }
+    }
   } catch(e) {}
 }
 
-// ══════ ARCHIVO ══════
-document.getElementById('fileinput').addEventListener('change', e => { if(e.target.files[0]) cargarArchivo(e.target.files[0]); });
+// ══════ ARCHIVO — MÚLTIPLES ══════
+let archivos = []; // array de todos los archivos subidos
+let foliosContados = 1;
+
+document.getElementById('fileinput').addEventListener('change', e => {
+  if(e.target.files.length > 0) cargarArchivos(Array.from(e.target.files));
+});
+
 const uzone = document.getElementById('uzone');
 ['dragover','dragleave','drop'].forEach(ev => uzone.addEventListener(ev, e => {
   e.preventDefault();
   if(ev==='dragover') uzone.classList.add('drag');
   else if(ev==='dragleave') uzone.classList.remove('drag');
-  else { uzone.classList.remove('drag'); if(e.dataTransfer.files[0]) cargarArchivo(e.dataTransfer.files[0]); }
+  else { uzone.classList.remove('drag'); if(e.dataTransfer.files.length>0) cargarArchivos(Array.from(e.dataTransfer.files)); }
 }));
-function cargarArchivo(f) {
-  archivo=f;
-  const ext=f.name.split('.').pop().toLowerCase();
-  const isImg=['jpg','jpeg','png','webp','gif'].includes(ext);
-  document.getElementById('fname').textContent=f.name;
-  document.getElementById('fsize').textContent=(f.size/1024).toFixed(1)+' KB';
-  document.getElementById('ficon').textContent=isImg?'🖼️':ext==='pdf'?'📄':'📝';
-  document.getElementById('fprev').style.display='flex';
-  document.getElementById('btnproc').disabled=false;
-  mime=isImg?f.type:(ext==='pdf'?'application/pdf':null);
-  if(ext==='docx'){
-    // Gemini no puede procesar DOCX binario directamente; avisar al usuario
-    const fpSize=document.getElementById('fsize');
-    if(fpSize) fpSize.textContent+=' — ⚠️ DOCX: se enviará solo el nombre. Para mejor extracción, exporta como PDF.';
+
+async function cargarArchivos(files) {
+  archivos = files;
+  const imagenes = files.filter(f => ['jpg','jpeg','png','webp','gif'].includes(f.name.split('.').pop().toLowerCase()));
+  const pdfs = files.filter(f => f.name.split('.').pop().toLowerCase() === 'pdf');
+  const docs = files.filter(f => f.name.split('.').pop().toLowerCase() === 'docx');
+
+  // — Calcular folios —
+  let folios = imagenes.length; // cada imagen = 1 folio
+
+  // Contar páginas reales de PDFs
+  for(const pdf of pdfs) {
+    const pages = await contarPaginasPDF(pdf);
+    folios += pages;
   }
+  if(docs.length > 0) folios += docs.length;
+  if(folios === 0) folios = 1;
+  foliosContados = folios;
+  window._foliosCalculados = String(folios);
+
+  // — Usar el primer archivo para análisis con Gemini —
+  archivo = files[0];
+  const ext = archivo.name.split('.').pop().toLowerCase();
+  const isImg = ['jpg','jpeg','png','webp','gif'].includes(ext);
+  mime = isImg ? archivo.type : (ext==='pdf' ? 'application/pdf' : null);
+
+  // Leer base64 del primer archivo
   if(mime) {
-    const r=new FileReader();
-    r.onload=e=>{b64=e.target.result.split(',')[1];if(isImg){document.getElementById('imgprev').src=e.target.result;document.getElementById('imgprev').style.display='block';}};
-    r.readAsDataURL(f);
+    const r = new FileReader();
+    r.onload = ev => {
+      b64 = ev.target.result.split(',')[1];
+      if(isImg && files.length===1) {
+        document.getElementById('imgprev').src = ev.target.result;
+        document.getElementById('imgprev').style.display = 'block';
+      }
+    };
+    r.readAsDataURL(archivo);
+  }
+
+  if(ext==='docx') {
+    document.getElementById('fsize').textContent = (archivo.size/1024).toFixed(1)+' KB — ⚠️ DOCX: para mejor extracción, exporta como PDF.';
+  }
+
+  // — Mostrar preview —
+  document.getElementById('fprev').style.display = 'flex';
+  document.getElementById('ficon').textContent = pdfs.length ? '📄' : imagenes.length ? '🖼️' : '📝';
+  document.getElementById('fname').textContent = files.length === 1 ? archivo.name : `${files.length} archivos seleccionados`;
+  document.getElementById('fsize').textContent = `${(files.reduce((a,f)=>a+f.size,0)/1024).toFixed(1)} KB total · 📄 ${folios} folio${folios!==1?'s':''}`;
+  document.getElementById('btnproc').disabled = false;
+
+  // — Thumbnails de múltiples imágenes —
+  if(files.length > 1 && imagenes.length > 0) {
+    const mp = document.getElementById('multi-preview');
+    const mt = document.getElementById('multi-thumbs');
+    const mc = document.getElementById('multi-count');
+    mp.style.display = 'block';
+    mc.textContent = `📸 ${files.length} archivos · ${folios} folios contados`;
+    mt.innerHTML = '';
+    imagenes.slice(0,6).forEach(img => {
+      const url = URL.createObjectURL(img);
+      mt.innerHTML += `<div style="width:64px;height:64px;border-radius:6px;overflow:hidden;border:2px solid var(--teal-m)"><img src="${url}" style="width:100%;height:100%;object-fit:cover"></div>`;
+    });
+    if(imagenes.length > 6) mt.innerHTML += `<div style="width:64px;height:64px;border-radius:6px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--ink3)">+${imagenes.length-6}</div>`;
   }
 }
+
+async function contarPaginasPDF(file) {
+  // Leer el PDF y buscar el número de páginas en el binario
+  return new Promise(resolve => {
+    const r = new FileReader();
+    r.onload = e => {
+      try {
+        const text = new Uint8Array(e.target.result);
+        // Buscar /Type /Page (no /Pages) en el PDF para contar páginas reales
+        let count = 0;
+        const str = String.fromCharCode(...text.slice(0, Math.min(text.length, 500000)));
+        // Método 1: buscar /Count en el diccionario de páginas
+        const match = str.match(/\/Count\s+(\d+)/);
+        if(match) { count = parseInt(match[1]); }
+        // Método 2: contar ocurrencias de /Type /Page
+        if(!count) {
+          const matches = str.match(/\/Type\s*\/Page[^s]/g);
+          count = matches ? matches.length : 1;
+        }
+        resolve(Math.max(1, count));
+      } catch(err) {
+        resolve(1);
+      }
+    };
+    r.readAsArrayBuffer(file);
+  });
+}
+
+function cargarArchivo(f) { cargarArchivos([f]); } // compatibilidad
+
 function limpiarArchivo() {
-  archivo=b64=mime=null;
+  archivo=b64=mime=null; archivos=[]; foliosContados=1; window._foliosCalculados='1';
   document.getElementById('fileinput').value='';
   document.getElementById('fprev').style.display='none';
   document.getElementById('imgprev').style.display='none';
   document.getElementById('btnproc').disabled=true;
+  const mp=document.getElementById('multi-preview');
+  if(mp) mp.style.display='none';
 }
 
 // ══════ STEPS ══════
@@ -1938,6 +2082,7 @@ function actualizarNumInf() {
   if(!analisis.datos) return;
   borrador=construirInforme(analisis.tipo||'oc',analisis.datos||{});
   document.getElementById('draft').value=borrador;
+  renderDocView(borrador);
 }
 
 // ══════ PROCESAR CON GEMINI ══════
@@ -2088,20 +2233,109 @@ function mostrarRevision() {
   const asunto=tipo==='oc'?`CONFORMIDAD DE O/C N° ${d.num_orden||''} - ${d.descripcion||''}`:tipo==='os'?`CONFORMIDAD DE O/S N° ${d.num_orden||''} - ${d.descripcion||''}`:d.descripcion||'';
   // Palabra clave obra: nombre obra abreviado o unidad
   const claveObra = d.nombre_obra ? d.nombre_obra.split(' ').slice(0,3).join(' ').toUpperCase() : (perfil.codigo||'');
+
+  // ── Calcular folios reales: contar hojas del archivo subido ──
+  let foliosCalculados = '1';
+  if(archivo) {
+    const ext = archivo.name.split('.').pop().toLowerCase();
+    if(ext === 'pdf') {
+      // Para PDF: estimar por tamaño (aprox 50KB por página)
+      const paginas = Math.max(1, Math.round(archivo.size / 51200));
+      foliosCalculados = String(paginas);
+    } else {
+      // Imagen o DOCX: contar como 1 folio base + adjuntos mencionados
+      foliosCalculados = '1';
+    }
+    // Si hay num_inf_residente probablemente hay expediente adjunto = +1
+    if(d.num_inf_residente) foliosCalculados = String(parseInt(foliosCalculados) + 1);
+  }
+
+  // ── Consultar último N° de informe del Sheet via WebApp ──
+  const numActual = val('numInforme');
+  if(!numActual && cfgSheet.webapp && cfgSheet.sheetId) {
+    consultarUltimoNumYActualizar();
+  }
+
   const colsSheet=[
     ['NOMBRE REMITENTE',d.nombre_remitente||''],
     ['N° INF. REMITENTE',d.num_inf_residente||''],
-    ['N° INF.','[auto]'],
+    ['N° INF.', val('numInforme')||'[auto]'],
     ['ASUNTO',asunto.substring(0,55)+(asunto.length>55?'...':'')],
-    ['FOLIOS','2'],
+    ['FOLIOS', foliosCalculados],
     ['FECHA',fecha],
     ['OBRA',claveObra],
     ['REMITIDO A',perfil.abrev_gerencia||perfil.gerente||d.destinatario||'GM'],
   ];
+  // Guardar folios calculados para usarlos al confirmar
+  window._foliosCalculados = foliosCalculados;
+
   document.getElementById('scols').innerHTML=colsSheet.map(([h,v])=>`<div class="sp-col"><div class="sp-h">${h}</div><div class="sp-v">${v||'—'}</div></div>`).join('');
   document.getElementById('draft').value=borrador;
+  // Renderizar vista de documento formateada
+  renderDocView(borrador);
+  switchDraftTab('doc');
+  // Poner folios calculados en el campo editable
+  const foliosInput = document.getElementById('numFolios');
+  if(foliosInput) foliosInput.value = foliosCalculados;
   document.getElementById('cmsgs').innerHTML='<div class="msg msg-ai">Revisa el informe generado. Si algo está incorrecto dímelo aquí.</div>';
   setStep(3);
+}
+
+// ══════ VISTA DOCUMENTO FORMATEADA ══════
+function switchDraftTab(tab) {
+  document.getElementById('tab-doc').classList.toggle('active', tab==='doc');
+  document.getElementById('tab-edit').classList.toggle('active', tab==='edit');
+  document.getElementById('draft-doc-view').style.display = tab==='doc' ? 'block' : 'none';
+  document.getElementById('draft').style.display = tab==='edit' ? 'block' : 'none';
+}
+
+function sincronizarDocView() {
+  renderDocView(document.getElementById('draft').value);
+}
+
+function renderDocView(texto) {
+  if(!texto) return;
+  const lineas = texto.split('\n');
+  let html = '';
+  lineas.forEach((l, i) => {
+    const t = l.trim();
+    if(!t) { html += '<div style="height:8px"></div>'; return; }
+    // Encabezado (primeras 3 líneas no vacías)
+    if(i < 5 && t && !t.startsWith('INFORME') && !t.startsWith('A ') && !t.startsWith('DE ') && !t.startsWith('ASUNTO')) {
+      html += `<div style="text-align:center;font-weight:bold;font-size:11pt;margin:2px 0">${t}</div>`;
+    }
+    // Número de informe
+    else if(t.startsWith('INFORME N°') || t.startsWith('INFORME TÉCNICO')) {
+      html += `<div style="text-align:center;font-weight:bold;font-size:12pt;margin:16px 0 8px;text-decoration:underline">${t}</div>`;
+    }
+    // Campos A/DE/ASUNTO/REFERENCIA
+    else if(t.match(/^(A\s+:|DE\s+:|ASUNTO\s+:|REFERENCIA\s*:)/)) {
+      html += `<div style="font-family:Arial;font-size:10.5pt;margin:3px 0"><strong>${t.split(':')[0]}:</strong>${t.split(':').slice(1).join(':')}</div>`;
+    }
+    // Lugar y fecha
+    else if(t.match(/^[A-Z][a-záéíóúñ].*,\s+\d{1,2}\s+de\s+/)) {
+      html += `<div style="margin:14px 0 10px;font-size:10.5pt">${t}</div>`;
+    }
+    // Tabla (línea con |)
+    else if(t.includes('|')) {
+      const celdas = t.split('|').map(c=>c.trim());
+      html += `<div style="font-family:monospace;font-size:9.5pt;background:var(--surface);padding:3px 6px;border-left:3px solid var(--teal)">${celdas.join(' &nbsp;|&nbsp; ')}</div>`;
+    }
+    // Adjuntos
+    else if(t.startsWith('- ') || t.startsWith('Adjunto')) {
+      html += `<div style="font-size:10.5pt;margin:2px 0 2px 10px">${t}</div>`;
+    }
+    // Firma
+    else if(t === 'Atentamente,' || t.includes('Atentamente')) {
+      html += `<div style="margin-top:30px;font-size:10.5pt">${t}</div>`;
+    }
+    // Texto normal
+    else {
+      html += `<div style="text-align:justify;font-size:10.5pt;margin:4px 0">${t}</div>`;
+    }
+  });
+  const render = document.getElementById('doc-render');
+  if(render) render.innerHTML = html;
 }
 
 // ══════ CHAT CORRECCIONES ══════
@@ -2128,6 +2362,7 @@ El usuario pide una corrección. Devuelve ÚNICAMENTE el texto completo actualiz
     const resp=data.candidates?.[0]?.content?.parts?.[0]?.text||'';
     borrador=resp.trim(); chatHist.push({role:'model',parts:[{text:resp}]});
     document.getElementById('draft').value=borrador;
+    renderDocView(borrador);
     const mt=document.getElementById('mtyping');
     if(mt){mt.textContent='✓ Informe actualizado.';mt.style='font-style:normal;opacity:1';mt.id='';}
   } catch(e) {
@@ -2322,12 +2557,12 @@ async function confirmar() {
  
   // Registrar en Sheet (separado de Drive)
   const claveObra = d.nombre_obra ? d.nombre_obra.split(' ').slice(0,3).join(' ').toUpperCase() : (perfil.codigo || '');
+  const folios = val('numFolios') || window._foliosCalculados || '2';
   const payloadSheet = {
-    // accion NO especificada → tu doPost actual lo procesa como registro de Sheet
     sheet_id: cfgSheet.sheetId || '', hoja: cfgSheet.hoja || 'INF. EMIT.',
     num_informe: numInf, nombre_remitente: d.nombre_remitente || '',
     num_inf_remitente: d.num_inf_residente || '', asunto,
-    num_folios: '2', nombre_obra: claveObra,
+    num_folios: folios, nombre_obra: claveObra,
     destinatario: perfil.abrev_gerencia || perfil.gerente || d.destinatario || 'GM',
   };
   const waUrl = cfgSheet.webapp || '';
@@ -2350,8 +2585,14 @@ async function confirmar() {
       const data = await res.json();
       const ac2  = document.getElementById('ac2');
       if (data.ok) {
-        if (ac2) { ac2.classList.add('ok'); ac2.innerHTML = '<div class="ai-ico">📊</div>Sheet registrado ✓'; }
-        if (!resultadoDrive) showStatus('✅ Registrado en el Sheet — N° ' + data.num_informe, 'ok');
+        // Si el Sheet asignó un número real, actualizar el borrador
+        if(data.num_informe && data.num_informe !== numInf) {
+          const numAsignado = String(data.num_informe).padStart(3,'0');
+          const draftEl = document.getElementById('draft');
+          if(draftEl) draftEl.value = draftEl.value.replace(/INFORME N° ___/g, 'INFORME N° '+numAsignado).replace(/INFORME N° \[auto\]/g, 'INFORME N° '+numAsignado);
+        }
+        if (ac2) { ac2.classList.add('ok'); ac2.innerHTML = '<div class="ai-ico">📊</div>Sheet registrado ✓ · N° '+(data.num_informe||numInf); }
+        if (!resultadoDrive) showStatus('✅ Registrado en el Sheet — N° ' + (data.num_informe||numInf), 'ok');
       } else {
         if (ac2) { ac2.innerHTML = '<div class="ai-ico">⚠️</div>Sheet: ' + (data.error||'Error'); }
         showStatus('⚠️ Sheet: ' + (data.error||'Error desconocido'), 'err');
