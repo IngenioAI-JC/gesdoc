@@ -636,6 +636,7 @@ table.hist tr:hover td{background:var(--surface)}
             <div class="spinner"></div>
             <div class="proc-title">Analizando el expediente...</div>
             <div class="proc-sub">Extrae datos, detecta tipo y completa tu plantilla oficial</div>
+            <div id="proc-timer" style="font-size:12px;color:var(--ink3);margin:8px 0">⏱ Tiempo restante: <span id="proc-secs" style="font-weight:700;color:var(--teal)">30</span>s</div>
             <div class="proc-steps">
               <div class="ps-item done" id="ps1"><div class="ps-dot"></div> Leyendo el archivo</div>
               <div class="ps-item" id="ps2"><div class="ps-dot"></div> Detectando tipo de documento</div>
@@ -643,6 +644,7 @@ table.hist tr:hover td{background:var(--surface)}
               <div class="ps-item" id="ps4"><div class="ps-dot"></div> Validando coincidencias</div>
               <div class="ps-item" id="ps5"><div class="ps-dot"></div> Completando plantilla oficial</div>
             </div>
+            <button onclick="cancelarProceso()" style="margin-top:14px;padding:7px 18px;border:1px solid var(--line);border-radius:8px;background:transparent;color:var(--ink3);font-size:12px;cursor:pointer">✕ Cancelar</button>
           </div>
         </div>
       </div>
@@ -2114,29 +2116,87 @@ Responde SOLO con JSON (sin markdown):
   const parts=[{text:prompt}];
   if(b64&&mime) parts.push({inline_data:{mime_type:mime,data:b64}});
 
+  // ── Timeout de 30 segundos ──
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 30000);
+
   try {
-    const res=await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
-      {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts}]})}
-    );
-    const data=await res.json();
+    let res;
+    try {
+      res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+        {
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({contents:[{parts}]}),
+          signal: controller.signal
+        }
+      );
+    } catch(fetchErr) {
+      if(fetchErr.name === 'AbortError') {
+        throw new Error('Gemini tardó más de 30 segundos. Intenta con un archivo más pequeño o vuelve a intentarlo.');
+      }
+      throw new Error('No se pudo conectar a Gemini: ' + fetchErr.message);
+    } finally {
+      clearTimeout(timeoutId);
+    }
+
+    if(!res.ok) {
+      const errData = await res.json().catch(()=>({}));
+      const msg = errData.error?.message || 'Error HTTP ' + res.status;
+      if(res.status === 400) throw new Error('API Key inválida o solicitud incorrecta: ' + msg);
+      if(res.status === 429) throw new Error('Límite de uso de Gemini alcanzado. Espera 1 minuto e intenta de nuevo.');
+      if(res.status === 503) throw new Error('Gemini no disponible temporalmente. Intenta en unos segundos.');
+      throw new Error(msg);
+    }
+
+    const data = await res.json();
     if(data.error) throw new Error(data.error.message);
-    let txt=data.candidates?.[0]?.content?.parts?.[0]?.text||'';
-    txt=txt.replace(/```json/gi,'').replace(/```/g,'').trim();
+
+    let txt = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    if(!txt) throw new Error('Gemini no devolvió contenido. Intenta de nuevo.');
+    txt = txt.replace(/```json/gi,'').replace(/```/g,'').trim();
+
     let parsed;
-    try{parsed=JSON.parse(txt);}catch(e){throw new Error('Respuesta no válida. Intenta de nuevo.');}
-    analisis=parsed; chatHist=[]; borrador=construirInforme(parsed.tipo||'oc',parsed.datos||{});
-    // Sugerir número correlativo
+    try { parsed = JSON.parse(txt); }
+    catch(e) { throw new Error('La respuesta de Gemini no se pudo procesar. Intenta de nuevo.'); }
+
+    analisis = parsed; chatHist = []; borrador = construirInforme(parsed.tipo||'oc', parsed.datos||{});
+    clearInterval(_procTimerInterval);
     sugerirNumeroCorrelativo();
-    setTimeout(()=>mostrarRevision(),400);
-    // Ejecutar agente validador
-    setTimeout(()=>ejecutarAgenteValidador(),800);
+    setTimeout(()=>mostrarRevision(), 400);
+    setTimeout(()=>ejecutarAgenteValidador(), 800);
+
   } catch(err) {
-    setStep(1); alert('❌ Error:\n'+err.message);
+    setStep(1);
+    alert('❌ ' + err.message);
   }
 }
 
+let _procTimerInterval = null;
+
+function iniciarContador() {
+  let secs = 30;
+  const el = document.getElementById('proc-secs');
+  if(!el) return;
+  clearInterval(_procTimerInterval);
+  el.textContent = secs;
+  _procTimerInterval = setInterval(() => {
+    secs--;
+    if(el) el.textContent = Math.max(0, secs);
+    if(secs <= 10 && el) el.style.color = '#E24B4A';
+    if(secs <= 0) clearInterval(_procTimerInterval);
+  }, 1000);
+}
+
+function cancelarProceso() {
+  clearInterval(_procTimerInterval);
+  setStep(1);
+  alert('Proceso cancelado. Puedes intentar con otro archivo.');
+}
+
 function animarPasos() {
+  iniciarContador();
   const ids=['ps2','ps3','ps4','ps5']; let i=0;
   document.getElementById('ps1').classList.add('done');
   function next(){
