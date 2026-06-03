@@ -296,6 +296,16 @@ input[type="file"]{display:none}
 #doc-render .doc-body{text-align:justify;margin:10px 0}
 #doc-render .doc-firma{margin-top:40px;text-align:center}
 
+/* ══ AI PROVIDER CARDS ══ */
+.ai-provider-card{border:2px solid var(--line);border-radius:12px;padding:14px 12px;cursor:pointer;text-align:center;transition:.15s;background:var(--white)}
+.ai-provider-card:hover{border-color:var(--teal);background:var(--teal-l)}
+.ai-provider-card.active{border-color:var(--teal);background:var(--teal-l);box-shadow:0 0 0 3px var(--teal-m)}
+.ap-logo{font-size:24px;margin-bottom:6px}
+.ap-name{font-size:14px;font-weight:700;color:var(--ink);margin-bottom:2px}
+.ap-model{font-size:11px;color:var(--ink3);font-family:var(--mono);margin-bottom:6px}
+.ap-badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;background:var(--success-l);color:var(--success)}
+.ap-badge-paid{background:var(--primary-l);color:var(--primary)}
+
 /* ══ DRAFT ══ */
 .draft-wrap{margin-bottom:16px}
 .draft-head{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--ink2);border-radius:var(--radius) var(--radius) 0 0}
@@ -535,7 +545,7 @@ table.hist tr:hover td{background:var(--surface)}
       <span class="sb-ico">📖</span> Guía Apps Script
     </div>
     <div class="sb-item" id="nav-apiconf" onclick="showPanel('apiconf')">
-      <span class="sb-ico">🔑</span> API Gemini
+      <span class="sb-ico">🤖</span> Proveedor IA
     </div>
   </nav>
 
@@ -1367,24 +1377,93 @@ function doGet(e) {
     ════════════════════════════════════════ -->
     <div class="panel" id="panel-apiconf">
       <div class="page-header">
-        <div class="page-title">🔑 API Gemini</div>
-        <div class="page-sub">Necesitas una API Key gratuita de Google para el procesamiento</div>
+        <div class="page-title">🔑 Proveedor de IA</div>
+        <div class="page-sub">Elige el modelo de inteligencia artificial que usará GesDoc PE</div>
       </div>
-      <div class="card">
-        <div class="card-title"><div class="ct-ico">🔑</div> API Key de Gemini</div>
-        <div class="alert alert-warn">
-          ⚠️ <div>Tu API Key se guarda <strong>solo en tu navegador</strong> (localStorage). Nunca se envía a ningún servidor externo salvo al de Google Gemini.</div>
+
+      <!-- SELECTOR DE PROVEEDOR -->
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-title"><div class="ct-ico">🤖</div> Modelo activo</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:16px">
+          <div class="ai-provider-card" id="prov-gemini" onclick="seleccionarProveedor('gemini')">
+            <div class="ap-logo">✨</div>
+            <div class="ap-name">Gemini</div>
+            <div class="ap-model">gemini-2.0-flash</div>
+            <div class="ap-badge">Gratis</div>
+          </div>
+          <div class="ai-provider-card" id="prov-claude" onclick="seleccionarProveedor('claude')">
+            <div class="ap-logo">🔶</div>
+            <div class="ap-name">Claude</div>
+            <div class="ap-model">claude-3-haiku</div>
+            <div class="ap-badge ap-badge-paid">De pago</div>
+          </div>
+          <div class="ai-provider-card" id="prov-openai" onclick="seleccionarProveedor('openai')">
+            <div class="ap-logo">⬛</div>
+            <div class="ap-name">ChatGPT</div>
+            <div class="ap-model">gpt-4o-mini</div>
+            <div class="ap-badge ap-badge-paid">De pago</div>
+          </div>
+          <div class="ai-provider-card" id="prov-deepseek" onclick="seleccionarProveedor('deepseek')">
+            <div class="ap-logo">🔵</div>
+            <div class="ap-name">DeepSeek</div>
+            <div class="ap-model">deepseek-chat</div>
+            <div class="ap-badge">Muy barato</div>
+          </div>
         </div>
+      </div>
+
+      <!-- GEMINI -->
+      <div class="card api-prov-panel" id="cfg-gemini">
+        <div class="card-title"><div class="ct-ico">✨</div> Google Gemini</div>
+        <div class="alert alert-warn">⚠️ <div>Tu API Key se guarda <strong>solo en tu navegador</strong>. Nunca se envía a servidores externos salvo a Google.</div></div>
         <div style="display:flex;flex-direction:column;gap:5px;margin-bottom:14px">
-          <label class="cfg-lbl">API Key</label>
-          <input type="password" class="cfg-input" id="apikey" placeholder="Pega tu API Key de Google AI Studio..." style="max-width:500px">
+          <label class="cfg-lbl">API Key de Google AI Studio</label>
+          <input type="password" class="cfg-input" id="apikey" placeholder="AIza..." style="max-width:500px">
         </div>
         <div style="font-size:12px;color:var(--ink3);margin-bottom:14px">¿No tienes una? Es gratis — <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:var(--teal)">obtenerla en aistudio.google.com →</a></div>
         <div id="api-status-msg" style="display:none" class="status-msg st-ok">✅ API Key activa y guardada</div>
-        <div class="btn-row">
-          <button class="btn btn-teal" onclick="guardarKey()">💾 Guardar API Key</button>
-        </div>
+        <div class="btn-row"><button class="btn btn-teal" onclick="guardarKey()">💾 Guardar</button></div>
       </div>
+
+      <!-- CLAUDE -->
+      <div class="card api-prov-panel" id="cfg-claude" style="display:none">
+        <div class="card-title"><div class="ct-ico">🔶</div> Anthropic Claude</div>
+        <div class="alert alert-warn">⚠️ <div>Requiere cuenta en <strong>console.anthropic.com</strong>. Tiene costo por uso (muy bajo para documentos).</div></div>
+        <div style="display:flex;flex-direction:column;gap:5px;margin-bottom:6px">
+          <label class="cfg-lbl">API Key de Anthropic</label>
+          <input type="password" class="cfg-input" id="apikey-claude" placeholder="sk-ant-..." style="max-width:500px">
+        </div>
+        <div style="font-size:12px;color:var(--ink3);margin-bottom:14px">Obtener en <a href="https://console.anthropic.com/settings/keys" target="_blank" style="color:var(--teal)">console.anthropic.com →</a></div>
+        <div id="claude-status" style="display:none" class="status-msg st-ok">✅ API Key guardada</div>
+        <div class="btn-row"><button class="btn btn-teal" onclick="guardarKeyProveedor('claude')">💾 Guardar</button></div>
+      </div>
+
+      <!-- OPENAI -->
+      <div class="card api-prov-panel" id="cfg-openai" style="display:none">
+        <div class="card-title"><div class="ct-ico">⬛</div> OpenAI ChatGPT</div>
+        <div class="alert alert-warn">⚠️ <div>Requiere cuenta en <strong>platform.openai.com</strong>. Modelo: <strong>gpt-4o-mini</strong> (económico y muy capaz).</div></div>
+        <div style="display:flex;flex-direction:column;gap:5px;margin-bottom:6px">
+          <label class="cfg-lbl">API Key de OpenAI</label>
+          <input type="password" class="cfg-input" id="apikey-openai" placeholder="sk-..." style="max-width:500px">
+        </div>
+        <div style="font-size:12px;color:var(--ink3);margin-bottom:14px">Obtener en <a href="https://platform.openai.com/api-keys" target="_blank" style="color:var(--teal)">platform.openai.com →</a></div>
+        <div id="openai-status" style="display:none" class="status-msg st-ok">✅ API Key guardada</div>
+        <div class="btn-row"><button class="btn btn-teal" onclick="guardarKeyProveedor('openai')">💾 Guardar</button></div>
+      </div>
+
+      <!-- DEEPSEEK -->
+      <div class="card api-prov-panel" id="cfg-deepseek" style="display:none">
+        <div class="card-title"><div class="ct-ico">🔵</div> DeepSeek</div>
+        <div class="alert alert-info" style="background:var(--teal-l);border-color:var(--teal-m);color:var(--teal-d)">💡 <div>DeepSeek es el más económico (~$0.001 por documento). Compatible con la API de OpenAI.</div></div>
+        <div style="display:flex;flex-direction:column;gap:5px;margin-bottom:6px">
+          <label class="cfg-lbl">API Key de DeepSeek</label>
+          <input type="password" class="cfg-input" id="apikey-deepseek" placeholder="sk-..." style="max-width:500px">
+        </div>
+        <div style="font-size:12px;color:var(--ink3);margin-bottom:14px">Obtener en <a href="https://platform.deepseek.com/api_keys" target="_blank" style="color:var(--teal)">platform.deepseek.com →</a></div>
+        <div id="deepseek-status" style="display:none" class="status-msg st-ok">✅ API Key guardada</div>
+        <div class="btn-row"><button class="btn btn-teal" onclick="guardarKeyProveedor('deepseek')">💾 Guardar</button></div>
+      </div>
+
     </div>
 
   </main>
@@ -1428,6 +1507,13 @@ function doGet(e) {
 <script>
 // ══════ ESTADO GLOBAL ══════
 let apiKey = localStorage.getItem('gkey') || '';
+let aiProveedor = localStorage.getItem('ai_proveedor') || 'gemini';
+let aiKeys = {
+  gemini:   localStorage.getItem('gkey') || '',
+  claude:   localStorage.getItem('key_claude') || '',
+  openai:   localStorage.getItem('key_openai') || '',
+  deepseek: localStorage.getItem('key_deepseek') || '',
+};
 let historial = JSON.parse(localStorage.getItem('hist') || '[]');
 let perfil = JSON.parse(localStorage.getItem('perfil') || 'null') || {};
 let cfgSheet = JSON.parse(localStorage.getItem('cfgSheet') || 'null') || {};
@@ -1441,6 +1527,7 @@ let resChatHist = [], resAgenteBusy = false;
 
 // ══════ INIT ══════
 window.onload = () => {
+  initProveedorUI();
   if (apiKey) {
     const el = document.getElementById('apikey');
     if(el) el.value = '••••••••••••••••';
@@ -1728,9 +1815,131 @@ function refreshCfgResumen() {
 }
 function borrarTodaCfg() {
   if(!confirm('¿Borrar toda la configuración? Esta acción no se puede deshacer.')) return;
-  localStorage.clear(); apiKey=''; perfil={}; cfgSheet={}; historial=[];
+  localStorage.clear(); apiKey=''; perfil={}; cfgSheet={}; historial=[]; aiKeys={gemini:'',claude:'',openai:'',deepseek:''};
   alert('✅ Configuración borrada.'); location.reload();
 }
+
+// ══════ MULTI-PROVEEDOR IA ══════
+function seleccionarProveedor(prov) {
+  aiProveedor = prov;
+  localStorage.setItem('ai_proveedor', prov);
+  ['gemini','claude','openai','deepseek'].forEach(p => {
+    document.getElementById('prov-'+p)?.classList.toggle('active', p===prov);
+    const panel = document.getElementById('cfg-'+p);
+    if(panel) panel.style.display = p===prov ? 'block' : 'none';
+  });
+}
+
+function guardarKeyProveedor(prov) {
+  const input = document.getElementById('apikey-'+prov);
+  if(!input) return;
+  const v = input.value.trim();
+  if(!v) { alert('Pega tu API Key primero'); return; }
+  aiKeys[prov] = v;
+  localStorage.setItem('key_'+prov, v);
+  if(prov==='gemini') { apiKey=v; localStorage.setItem('gkey',v); }
+  const st = document.getElementById(prov+'-status');
+  if(st) { st.style.display='flex'; st.textContent='✅ API Key guardada'; }
+  input.value = '••••••••'+v.slice(-4);
+}
+
+function initProveedorUI() {
+  seleccionarProveedor(aiProveedor);
+  ['claude','openai','deepseek'].forEach(p => {
+    const el = document.getElementById('apikey-'+p);
+    if(el && aiKeys[p]) el.value = '••••••••'+aiKeys[p].slice(-4);
+  });
+}
+
+// ── Función central: llama al proveedor activo ──
+async function llamarIA(promptTexto, partesGemini, signal) {
+  const prov = aiProveedor;
+  const key  = aiKeys[prov] || apiKey;
+  if(!key) throw new Error('No hay API Key para ' + prov.toUpperCase() + '. Ve a "Proveedor IA" en el menú.');
+
+  if(prov === 'gemini') {
+    const partes = partesGemini || [{text: promptTexto}];
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`,
+      {method:'POST', headers:{'Content-Type':'application/json'},
+       body:JSON.stringify({contents:[{parts}]}), signal}
+    );
+    if(!res.ok) {
+      const e = await res.json().catch(()=>({}));
+      if(res.status===429) throw new Error('Límite de Gemini alcanzado. Espera 1 minuto e intenta de nuevo.');
+      if(res.status===400) throw new Error('API Key de Gemini inválida.');
+      throw new Error(e.error?.message || 'Error Gemini HTTP '+res.status);
+    }
+    const data = await res.json();
+    if(data.error) throw new Error(data.error.message);
+    const txt = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    if(!txt) throw new Error('Gemini no devolvió contenido. Intenta de nuevo.');
+    return txt;
+  }
+
+  if(prov === 'claude') {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{
+        'x-api-key': key,
+        'anthropic-version': '2023-06-01',
+        'content-type': 'application/json',
+        'anthropic-dangerous-direct-browser-ipc': 'true'
+      },
+      body: JSON.stringify({model:'claude-haiku-4-5', max_tokens:2048,
+        messages:[{role:'user', content: promptTexto}]}),
+      signal
+    });
+    if(!res.ok) {
+      const e = await res.json().catch(()=>({}));
+      if(res.status===401) throw new Error('API Key de Claude inválida.');
+      if(res.status===429) throw new Error('Límite de Claude alcanzado.');
+      throw new Error(e.error?.message || 'Error Claude HTTP '+res.status);
+    }
+    const data = await res.json();
+    return data.content?.[0]?.text || '';
+  }
+
+  if(prov === 'openai') {
+    const res = await fetch('https://api.openai.com/v1/chat/completions', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},
+      body: JSON.stringify({model:'gpt-4o-mini', max_tokens:2048,
+        messages:[{role:'user', content: promptTexto}]}),
+      signal
+    });
+    if(!res.ok) {
+      const e = await res.json().catch(()=>({}));
+      if(res.status===401) throw new Error('API Key de OpenAI inválida.');
+      if(res.status===429) throw new Error('Límite de OpenAI alcanzado.');
+      throw new Error(e.error?.message || 'Error OpenAI HTTP '+res.status);
+    }
+    const data = await res.json();
+    return data.choices?.[0]?.message?.content || '';
+  }
+
+  if(prov === 'deepseek') {
+    const res = await fetch('https://api.deepseek.com/chat/completions', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},
+      body: JSON.stringify({model:'deepseek-chat', max_tokens:2048,
+        messages:[{role:'user', content: promptTexto}]}),
+      signal
+    });
+    if(!res.ok) {
+      const e = await res.json().catch(()=>({}));
+      if(res.status===401) throw new Error('API Key de DeepSeek inválida.');
+      if(res.status===429) throw new Error('Límite de DeepSeek alcanzado.');
+      throw new Error(e.error?.message || 'Error DeepSeek HTTP '+res.status);
+    }
+    const data = await res.json();
+    return data.choices?.[0]?.message?.content || '';
+  }
+
+  throw new Error('Proveedor no reconocido: ' + prov);
+}
+
+// ══════ GUARDAR API KEY (Gemini — compatibilidad) ══════
 function guardarKey() {
   const v = val('apikey');
   if(!v||v.startsWith('•')) { alert('Pega tu API Key primero'); return; }
@@ -2116,50 +2325,24 @@ Responde SOLO con JSON (sin markdown):
   const parts=[{text:prompt}];
   if(b64&&mime) parts.push({inline_data:{mime_type:mime,data:b64}});
 
-  // ── Timeout de 30 segundos ──
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 30000);
 
   try {
-    let res;
+    let txt;
     try {
-      res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
-        {
-          method:'POST',
-          headers:{'Content-Type':'application/json'},
-          body:JSON.stringify({contents:[{parts}]}),
-          signal: controller.signal
-        }
-      );
+      txt = await llamarIA(prompt, parts, controller.signal);
     } catch(fetchErr) {
-      if(fetchErr.name === 'AbortError') {
-        throw new Error('Gemini tardó más de 30 segundos. Intenta con un archivo más pequeño o vuelve a intentarlo.');
-      }
-      throw new Error('No se pudo conectar a Gemini: ' + fetchErr.message);
+      if(fetchErr.name === 'AbortError') throw new Error('Tardó más de 30 segundos. Intenta con un archivo más pequeño.');
+      throw fetchErr;
     } finally {
       clearTimeout(timeoutId);
     }
 
-    if(!res.ok) {
-      const errData = await res.json().catch(()=>({}));
-      const msg = errData.error?.message || 'Error HTTP ' + res.status;
-      if(res.status === 400) throw new Error('API Key inválida o solicitud incorrecta: ' + msg);
-      if(res.status === 429) throw new Error('Límite de uso de Gemini alcanzado. Espera 1 minuto e intenta de nuevo.');
-      if(res.status === 503) throw new Error('Gemini no disponible temporalmente. Intenta en unos segundos.');
-      throw new Error(msg);
-    }
-
-    const data = await res.json();
-    if(data.error) throw new Error(data.error.message);
-
-    let txt = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-    if(!txt) throw new Error('Gemini no devolvió contenido. Intenta de nuevo.');
     txt = txt.replace(/```json/gi,'').replace(/```/g,'').trim();
-
     let parsed;
     try { parsed = JSON.parse(txt); }
-    catch(e) { throw new Error('La respuesta de Gemini no se pudo procesar. Intenta de nuevo.'); }
+    catch(e) { throw new Error('La respuesta no se pudo procesar. Intenta de nuevo.'); }
 
     analisis = parsed; chatHist = []; borrador = construirInforme(parsed.tipo||'oc', parsed.datos||{});
     clearInterval(_procTimerInterval);
@@ -2248,12 +2431,7 @@ Responde en formato JSON:
 {"es_coherente": true/false, "puntaje": 0-100, "observaciones": ["obs1","obs2"], "aprobado": true/false, "sugerencias": ["sug1"]}`;
 
   try {
-    const res=await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
-      {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt}]}]})}
-    );
-    const data=await res.json();
-    let txt=data.candidates?.[0]?.content?.parts?.[0]?.text||'{}';
+    let txt = await llamarIA(prompt).catch(()=>'{}');
     txt=txt.replace(/```json/gi,'').replace(/```/g,'').trim();
     const r=JSON.parse(txt);
     loading.style.display='none'; result.style.display='block';
@@ -2414,12 +2592,8 @@ async function chat() {
 Borrador actual:\n${borrador}\nDatos extraídos: ${JSON.stringify(analisis.datos||{})}\nPerfil entidad: ${JSON.stringify(perfil)}
 El usuario pide una corrección. Devuelve ÚNICAMENTE el texto completo actualizado. Sin explicaciones, sin markdown.`;
   try {
-    const res=await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
-      {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({system_instruction:{parts:[{text:sys}]},contents:chatHist})}
-    );
-    const data=await res.json();
-    const resp=data.candidates?.[0]?.content?.parts?.[0]?.text||'';
+    const chatPrompt = sys + '\n\nCorreción solicitada: ' + msg;
+    const resp = await llamarIA(chatPrompt);
     borrador=resp.trim(); chatHist.push({role:'model',parts:[{text:resp}]});
     document.getElementById('draft').value=borrador;
     renderDocView(borrador);
@@ -2789,10 +2963,8 @@ Genera el documento completo respetando el formato oficial peruano: encabezado c
   const btn=document.querySelector('#adm-form-card .btn-adm');
   if(btn){btn.disabled=true;btn.textContent='⏳ Generando...';}
   try {
-    const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt}]}]})});
-    const data=await res.json();
-    const txt=data.candidates?.[0]?.content?.parts?.[0]?.text||'';
-    if(!txt){alert('❌ Gemini no devolvió contenido. Intenta de nuevo o revisa tu API Key.');return;}
+    const txt=await llamarIA(prompt);
+    if(!txt){alert('❌ No se obtuvo respuesta. Intenta de nuevo.');return;}
     document.getElementById('adm-draft').value=txt;
     document.getElementById('adm-draft-label').textContent=`📄 ${TITULOS_ADM[tipo]||tipo} generado`;
     document.getElementById('adm-result-card').style.display='block';
@@ -2939,10 +3111,7 @@ Genera el documento completo en formato oficial peruano para obras públicas. In
   const btn=document.querySelector('#res-form-card .btn-res');
   if(btn){btn.disabled=true;btn.textContent='⏳ Generando...';}
   try{
-    const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt}]}]})});
-    const data=await res.json();
-    if(data.error) throw new Error(data.error.message||'Error de API Gemini');
-    const txt=data.candidates?.[0]?.content?.parts?.[0]?.text||'';
+    const txt=await llamarIA(prompt);
     if(!txt){alert('❌ Gemini no devolvió contenido. Intenta de nuevo o revisa tu API Key.');return;}
     resBorrador=txt;
     document.getElementById('res-draft').value=txt;
@@ -2970,9 +3139,7 @@ async function ejecutarAgenteValidadorRes(){
 Documento: ${draft.slice(0,800)}
 Responde JSON: {"es_coherente":true/false,"puntaje":0-100,"observaciones":[],"aprobado":true/false,"sugerencias":[]}`;
   try{
-    const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt}]}]})});
-    const data=await res.json();
-    let txt=data.candidates?.[0]?.content?.parts?.[0]?.text||'{}';
+    let txt=await llamarIA(prompt).catch(()=>'{}');
     txt=txt.replace(/```json/gi,'').replace(/```/g,'').trim();
     const r=JSON.parse(txt);
     loading.style.display='none';result.style.display='block';
@@ -2994,8 +3161,7 @@ async function chatRes(){
   resBorrador=document.getElementById('res-draft').value;
   const sys=`Eres experto en documentos de obras públicas peruanas. Borrador actual:\n${resBorrador}\nEl usuario pide una corrección. Devuelve ÚNICAMENTE el texto completo actualizado. Sin explicaciones.`;
   try{
-    const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:sys+'\n\nCorreción solicitada: '+msg}]}]})});
-    const data=await res.json();
+    const data={candidates:[{content:{parts:[{text: await llamarIA(sys+'\n\nCorreción solicitada: '+msg)}]}}]};
     const txt=data.candidates?.[0]?.content?.parts?.[0]?.text||'';
     resBorrador=txt;document.getElementById('res-draft').value=txt;
     const mt=document.getElementById('res-mtyping');if(mt){mt.textContent='✓ Actualizado.';mt.id='';}
